@@ -1,6 +1,6 @@
 # Install REA on a Mac
 
-REA (Reverse Engineer Anything, [github.com/morluto/rea](https://github.com/morluto/rea), MIT) is a local MCP server. This guide installs REA 6.5.0 for **Claude Desktop** and **Claude Code** with `install-rea-mac.sh` (build 2026-10-16.1). Written in ASD-STE100.
+REA (Reverse Engineer Anything, [github.com/morluto/rea](https://github.com/morluto/rea), MIT) is a local MCP server. This guide installs REA 6.5.0 for **Claude Desktop** and **Claude Code** with `install-rea-mac.sh` (build 2026-10-16.2). Written in ASD-STE100.
 
 ## Before you start
 
@@ -33,12 +33,41 @@ The script downloads the official Node 22 build into `~/.local/share/rea-node` a
    ```bash
    bash install-rea-mac.sh
    ```
-6. When REA shows its plan for Claude Code and Claude Desktop, approve it. If REA asks to install Hopper, you can say **No**. Hopper is necessary only for native binary analysis.
+6. REA shows its plan for Claude Code and Claude Desktop. The script selects the 2 clients with `--client` flags, thus REA can apply the plan without a yes/no question. The only question that you see can be about Hopper. You can say **No** to Hopper. Hopper is necessary only for native binary analysis. To make sure that REA set up the 2 clients, do the checks in [Check the installation](#check-the-installation).
 7. At the end, the script runs `REA doctor` for both clients. Read the result.
 8. Start Claude Desktop again. In a new chat, ask: **"List the REA tools that you have."**
 9. Upload `skills/reverse-engineer-anything.zip` in claude.ai (**Customize > Skills**), if you did not do it before.
+10. Do the checks in [Check the installation](#check-the-installation).
 
 Each step prints a time stamp. If one step takes more than 10 minutes, stop the script with **Ctrl+C** and send the last 20 lines of the Terminal output.
+
+## Check the installation
+
+Do all 5 checks. If a check fails, see [Problems](#problems).
+
+| # | Check | Command or action | Correct result |
+|---|---|---|---|
+| 1 | REA health | `bash install-rea-mac.sh --doctor` | No `FAIL` and no `error` lines for `claude_desktop` and for `claude_code`. |
+| 2 | Config files | `grep -c '"rea"' ~/.claude.json "$HOME/Library/Application Support/Claude/claude_desktop_config.json"` | A number of 1 or more for each file. |
+| 3 | Node path in config | `grep -A2 '"rea"' "$HOME/Library/Application Support/Claude/claude_desktop_config.json"` | `"command"` shows the full path that ends in `rea-node/current/bin/npx` (or a different Node 22 `npx`). It is not only `npx`. |
+| 4 | Claude Code | In Terminal: `claude mcp list`. Then in a Claude Code session: `/mcp`. | `rea` shows `✓ Connected` (`/mcp` shows `connected`). The command starts with the full Node 22 path, for example `/Users/<you>/.local/share/rea-node/current/bin/npx`. If it starts with only `npx`, see the note below this table. |
+| 5 | Claude Desktop | Start Claude Desktop. Open **Settings > Developer**. Then, in a new chat, ask: **"Use REA to open ~/Downloads/WORKSPACE/SkillsPlugins/pr.zip and inspect it."** | **Settings > Developer** shows `rea` as `running`. Claude calls `open_binary` and `inspect_artifact`, and shows 5 entries in the archive. |
+
+Check 5 is the full test. It makes sure that REA starts, reads a local file, and sends a result. Checks 1 to 4 only make sure that the setup is correct.
+
+If check 3 or check 4 shows only `npx` (not a full path), step 3 of the script did not run. (Build 2026-10-16.1 stopped after `REA setup` if REA ended with an error code.) REA can work in this condition, but it uses your default Node, and that can change (for example, with `nvm`). To fix it, quit Claude Desktop (Cmd+Q), close all Claude Code sessions, and run:
+
+```bash
+bash install-rea-mac.sh --fix-paths
+```
+
+This does only step 3 and REA doctor. At the end, it shows `OK` or `FAIL` for the `rea` command in each config file. Both lines must show `OK`.
+
+If check 4 does not show `rea`, the REA setup did not add Claude Code. Close all Claude Code sessions, quit Claude Desktop (Cmd+Q), and run the script again. It is safe to run again: it uses the Node 22 that it installed before, and it sets the full Node path in the 2 config files again.
+
+```bash
+bash install-rea-mac.sh
+```
 
 ## Other commands
 
@@ -46,6 +75,7 @@ Each step prints a time stamp. If one step takes more than 10 minutes, stop the 
 |---|---|
 | `bash install-rea-mac.sh --doctor` | Runs only the REA health checks. |
 | `bash install-rea-mac.sh --dry-run` | Shows the REA setup plan. Changes nothing. |
+| `bash install-rea-mac.sh --fix-paths` | Sets the full Node 22 path in the 2 config files, then runs REA doctor. Does not run REA setup again. |
 | `REA_VERSION=6.6.0 bash install-rea-mac.sh` | Installs or updates to a different REA version. |
 
 ## What the script changes

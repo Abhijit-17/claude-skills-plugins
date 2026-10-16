@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install-rea-mac.sh  (build 2026-10-16.1)
+# install-rea-mac.sh  (build 2026-10-16.2)
 #
 # Installs REA (Reverse Engineer Anything, github.com/morluto/rea, MIT) on a Mac
 # for Claude Desktop and Claude Code. No sudo, no Homebrew, no compile.
@@ -8,6 +8,7 @@
 #   bash install-rea-mac.sh             install, or update to the pinned version
 #   bash install-rea-mac.sh --doctor    only run the REA health checks
 #   bash install-rea-mac.sh --dry-run   show the REA setup plan; change nothing
+#   bash install-rea-mac.sh --fix-paths only do step 3 (full Node 22 path) and step 4
 #
 # Steps:
 #   1. Node 22: uses a Node 22.19+ that is already here (this script's own copy,
@@ -92,21 +93,12 @@ doctor() {
     "${REA[@]}" doctor --client "$c" 2>&1 | tail -20 || true
   done
 }
-case "${1:-}" in
-  --doctor)  doctor; exit 0 ;;
-  --dry-run) say "2. REA setup plan (dry run, no changes)"
-             "${REA[@]}" setup --client claude_code --client claude_desktop --dry-run; exit 0 ;;
-esac
-
-if pgrep -x Claude >/dev/null 2>&1; then
-  stop "Claude Desktop is running. Quit it fully (Cmd+Q), then run this script again."
-fi
-
-say "2. REA $REA_VERSION setup for Claude Code and Claude Desktop"
-info "The first run downloads REA from npm (one or two minutes). Then REA shows its plan."
-info "Approve the plan for the 2 clients. You can say No to Hopper."
-"${REA[@]}" setup --client claude_code --client claude_desktop
-
+need_quit() {
+  if pgrep -x Claude >/dev/null 2>&1; then
+    stop "Claude Desktop is running. Quit it fully (Cmd+Q), then run this script again."
+  fi
+}
+fix_paths() {
 say "3. Use the full Node $NODE_MAJOR path in the client configs"
 "$N22/node" - "$NPX" "$N22" <<'JS'
 const fs = require('fs'), path = require('path'), os = require('os');
@@ -138,6 +130,33 @@ for (const f of files) {
   } else console.log('   no change needed in', f);
 }
 JS
+  say "Check: the rea command in each config file"
+  "$N22/node" -e '
+    const fs=require("fs"),path=require("path"),os=require("os");
+    for (const f of [path.join(os.homedir(),"Library/Application Support/Claude/claude_desktop_config.json"), path.join(os.homedir(),".claude.json")]) {
+      let c="(no file)"; try { const d=JSON.parse(fs.readFileSync(f,"utf8")); c=(d.mcpServers&&d.mcpServers.rea&&d.mcpServers.rea.command)||"(no rea entry)"; } catch(e) { c="(cannot read: "+e.message+")"; }
+      console.log("   "+(c.startsWith("/")?"OK  ":"FAIL")+" "+c+"   <- "+f);
+    }'
+}
+case "${1:-}" in
+  --doctor)  doctor; exit 0 ;;
+  --dry-run) say "2. REA setup plan (dry run, no changes)"
+             "${REA[@]}" setup --client claude_code --client claude_desktop --dry-run; exit 0 ;;
+  --fix-paths) need_quit; fix_paths; doctor; exit 0 ;;
+esac
+
+need_quit
+
+say "2. REA $REA_VERSION setup for Claude Code and Claude Desktop"
+info "The first run downloads REA from npm (one or two minutes). Then REA shows its plan."
+info "Approve the plan for the 2 clients. You can say No to Hopper."
+set +e
+"${REA[@]}" setup --client claude_code --client claude_desktop
+RC=$?
+set -e
+[ "$RC" -eq 0 ] || info "REA setup ended with exit code $RC. The script continues with step 3."
+
+fix_paths
 
 doctor
 say "Done in $(( $(date +%s) - T0 )) s. Start Claude Desktop again. In a new chat, ask: 'List the REA tools that you have.'"
