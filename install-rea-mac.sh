@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install-rea-mac.sh  (build 2026-10-16.2)
+# install-rea-mac.sh  (build 2026-10-16.3)
 #
 # Installs REA (Reverse Engineer Anything, github.com/morluto/rea, MIT) on a Mac
 # for Claude Desktop and Claude Code. No sudo, no Homebrew, no compile.
@@ -87,11 +87,12 @@ NPX="$N22/npx"
 REA=( "$NPX" -y "rea-agents@$REA_VERSION" )
 
 doctor() {
-  say "REA doctor"
-  for c in claude_desktop claude_code; do
-    echo "-- $c"
-    "${REA[@]}" doctor --client "$c" 2>&1 | tail -20 || true
-  done
+  say "REA doctor (it shows all clients that REA knows)"
+  "${REA[@]}" doctor --client claude_code 2>&1 || true
+  info "Read only the claude_code and claude_desktop lines. 'missing' for copilot_cli or vscode is"
+  info "correct: this script does not set up those clients. 'stale' is expected after step 3:"
+  info "the probable cause is that the entry is not the same as what 'rea setup' writes. Do not run"
+  info "'rea setup' again for this reason. The real test is 'claude mcp get rea' (Connected)."
 }
 need_quit() {
   if pgrep -x Claude >/dev/null 2>&1; then

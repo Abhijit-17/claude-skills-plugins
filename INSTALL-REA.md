@@ -1,6 +1,6 @@
 # Install REA on a Mac
 
-REA (Reverse Engineer Anything, [github.com/morluto/rea](https://github.com/morluto/rea), MIT) is a local MCP server. This guide installs REA 6.5.0 for **Claude Desktop** and **Claude Code** with `install-rea-mac.sh` (build 2026-10-16.2). Written in ASD-STE100.
+REA (Reverse Engineer Anything, [github.com/morluto/rea](https://github.com/morluto/rea), MIT) is a local MCP server. This guide installs REA 6.5.0 for **Claude Desktop** and **Claude Code** with `install-rea-mac.sh` (build 2026-10-16.3). Written in ASD-STE100.
 
 ## Before you start
 
@@ -47,11 +47,13 @@ Do all 5 checks. If a check fails, see [Problems](#problems).
 
 | # | Check | Command or action | Correct result |
 |---|---|---|---|
-| 1 | REA health | `bash install-rea-mac.sh --doctor` | No `FAIL` and no `error` lines for `claude_desktop` and for `claude_code`. |
+| 1 | REA health | `bash install-rea-mac.sh --doctor` | `claude_code` and `claude_desktop` each show a `command` that starts with the full Node 22 path. `state: stale` is expected (see the note below this table). `missing` for `copilot_cli` and `vscode` is correct. |
 | 2 | Config files | `grep -c '"rea"' ~/.claude.json "$HOME/Library/Application Support/Claude/claude_desktop_config.json"` | A number of 1 or more for each file. |
 | 3 | Node path in config | `grep -A2 '"rea"' "$HOME/Library/Application Support/Claude/claude_desktop_config.json"` | `"command"` shows the full path that ends in `rea-node/current/bin/npx` (or a different Node 22 `npx`). It is not only `npx`. |
 | 4 | Claude Code | In Terminal: `claude mcp list`. Then in a Claude Code session: `/mcp`. | `rea` shows `✓ Connected` (`/mcp` shows `connected`). The command starts with the full Node 22 path, for example `/Users/<you>/.local/share/rea-node/current/bin/npx`. If it starts with only `npx`, see the note below this table. |
 | 5 | Claude Desktop | Start Claude Desktop. Open **Settings > Developer**. Then, in a new chat, ask: **"Use REA to open ~/Downloads/WORKSPACE/SkillsPlugins/pr.zip and inspect it."** | **Settings > Developer** shows `rea` as `running`. Claude calls `open_binary` and `inspect_artifact`, and shows 5 entries in the archive. |
+
+About `state: stale` in check 1: `rea setup` writes only `npx`. Step 3 of the script changes it to the full Node 22 path and adds a `PATH`. The probable cause of `stale` is that the entry is now not the same as the entry that `rea setup` writes. If checks 4 and 5 are correct, `stale` is not a problem. Do not run `rea setup` again for this reason: it can set the command back to only `npx`. If you do run it, run `bash install-rea-mac.sh --fix-paths` after it.
 
 Check 5 is the full test. It makes sure that REA starts, reads a local file, and sends a result. Checks 1 to 4 only make sure that the setup is correct.
 
