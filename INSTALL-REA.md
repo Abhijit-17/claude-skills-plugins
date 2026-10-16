@@ -1,6 +1,6 @@
 # Install REA on a Mac
 
-REA (Reverse Engineer Anything, [github.com/morluto/rea](https://github.com/morluto/rea), MIT) is a local MCP server. This guide installs REA 6.5.0 for **Claude Desktop** and **Claude Code** with `install-rea-mac.sh` (build 2026-10-16.3). Written in ASD-STE100.
+REA (Reverse Engineer Anything, [github.com/morluto/rea](https://github.com/morluto/rea), MIT) is a local MCP server. This guide installs REA 6.5.0 for **Claude Desktop** and **Claude Code** with `install-rea-mac.sh` (build 2026-10-16.4). Written in ASD-STE100.
 
 ## Before you start
 
@@ -17,7 +17,7 @@ The script downloads the official Node 22 build into `~/.local/share/rea-node` a
 ## Steps
 
 1. Quit Claude Desktop fully with **Cmd+Q**. Closing the window is not sufficient.
-2. Close all Claude Code sessions.
+2. If Claude Code is installed, close all Claude Code sessions. If Claude Code is not installed, the script sets up Claude Desktop only.
 3. Open Terminal and get the script. Use one of these:
    - With the repo: `cd ~/Downloads/WORKSPACE/SkillsPlugins && git pull`
    - Without the repo:
@@ -33,7 +33,7 @@ The script downloads the official Node 22 build into `~/.local/share/rea-node` a
    ```bash
    bash install-rea-mac.sh
    ```
-6. REA shows its plan for Claude Code and Claude Desktop. The script selects the 2 clients with `--client` flags, thus REA can apply the plan without a yes/no question. The only question that you see can be about Hopper. You can say **No** to Hopper. Hopper is necessary only for native binary analysis. To make sure that REA set up the 2 clients, do the checks in [Check the installation](#check-the-installation).
+6. REA shows its plan for Claude Desktop (and Claude Code, if it is installed). The script selects the clients with `--client` flags, thus REA can apply the plan without a yes/no question. The only question that you see can be about Hopper. You can say **No** to Hopper. Hopper is necessary only for native binary analysis. To make sure that REA set up the clients, do the checks in [Check the installation](#check-the-installation).
 7. At the end, the script runs `REA doctor` for both clients. Read the result.
 8. Start Claude Desktop again. In a new chat, ask: **"List the REA tools that you have."**
 9. Upload `skills/reverse-engineer-anything.zip` in claude.ai (**Customize > Skills**), if you did not do it before.
@@ -50,7 +50,7 @@ Do all 5 checks. If a check fails, see [Problems](#problems).
 | 1 | REA health | `bash install-rea-mac.sh --doctor` | `claude_code` and `claude_desktop` each show a `command` that starts with the full Node 22 path. `state: stale` is expected (see the note below this table). `missing` for `copilot_cli` and `vscode` is correct. |
 | 2 | Config files | `grep -c '"rea"' ~/.claude.json "$HOME/Library/Application Support/Claude/claude_desktop_config.json"` | A number of 1 or more for each file. |
 | 3 | Node path in config | `grep -A2 '"rea"' "$HOME/Library/Application Support/Claude/claude_desktop_config.json"` | `"command"` shows the full path that ends in `rea-node/current/bin/npx` (or a different Node 22 `npx`). It is not only `npx`. |
-| 4 | Claude Code | In Terminal: `claude mcp list`. Then in a Claude Code session: `/mcp`. | `rea` shows `✓ Connected` (`/mcp` shows `connected`). The command starts with the full Node 22 path, for example `/Users/<you>/.local/share/rea-node/current/bin/npx`. If it starts with only `npx`, see the note below this table. |
+| 4 | Claude Code (skip if Claude Code is not installed) | In Terminal: `claude mcp list`. Then in a Claude Code session: `/mcp`. | `rea` shows `✓ Connected` (`/mcp` shows `connected`). The command starts with the full Node 22 path, for example `/Users/<you>/.local/share/rea-node/current/bin/npx`. If it starts with only `npx`, see the note below this table. |
 | 5 | Claude Desktop | Start Claude Desktop. Open **Settings > Developer**. Then, in a new chat, ask: **"Use REA to open ~/Downloads/WORKSPACE/SkillsPlugins/pr.zip and inspect it."** | **Settings > Developer** shows `rea` as `running`. Claude calls `open_binary` and `inspect_artifact`, and shows 5 entries in the archive. |
 
 About `state: stale` in check 1: `rea setup` writes only `npx`. Step 3 of the script changes it to the full Node 22 path and adds a `PATH`. The probable cause of `stale` is that the entry is now not the same as the entry that `rea setup` writes. If checks 4 and 5 are correct, `stale` is not a problem. Do not run `rea setup` again for this reason: it can set the command back to only `npx`. If you do run it, run `bash install-rea-mac.sh --fix-paths` after it.
@@ -79,6 +79,7 @@ bash install-rea-mac.sh
 | `bash install-rea-mac.sh --dry-run` | Shows the REA setup plan. Changes nothing. |
 | `bash install-rea-mac.sh --fix-paths` | Sets the full Node 22 path in the 2 config files, then runs REA doctor. Does not run REA setup again. |
 | `REA_VERSION=6.6.0 bash install-rea-mac.sh` | Installs or updates to a different REA version. |
+| `REA_CLIENTS=claude_desktop bash install-rea-mac.sh` | Sets up only the clients that you name. Default: Claude Desktop, plus Claude Code if it is installed. |
 
 ## What the script changes
 
@@ -86,7 +87,7 @@ bash install-rea-mac.sh
 |---|---|
 | `~/.local/share/rea-node/` | Node 22 (official build), only if no Node 22.19+ is found. |
 | `~/Library/Application Support/Claude/claude_desktop_config.json` | REA setup adds `mcpServers.rea`. The script then sets its command to the full Node 22 `npx` path. A backup is made first (`*.bak-rea-<time>`). |
-| `~/.claude.json` | The same for Claude Code. |
+| `~/.claude.json` | The same for Claude Code. Only if Claude Code is installed (the `claude` command or `~/.claude.json` is found). |
 | npm cache (`~/.npm`) | The REA package. |
 
 Why the full path: Claude Desktop starts MCP servers with a short PATH. Without the full path, it can find your old Node, or no Node, and REA does not start.

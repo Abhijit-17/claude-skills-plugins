@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install-rea-mac.sh  (build 2026-10-16.3)
+# install-rea-mac.sh  (build 2026-10-16.4)
 #
 # Installs REA (Reverse Engineer Anything, github.com/morluto/rea, MIT) on a Mac
 # for Claude Desktop and Claude Code. No sudo, no Homebrew, no compile.
@@ -26,6 +26,10 @@
 #      Node 22. Reason: the apps start MCP servers with a short PATH. A backup
 #      of each changed file is made first.
 #   4. REA doctor for both clients.
+#
+# Claude Code is optional. If the "claude" command is not found (and there is
+# no ~/.claude.json), the script sets up Claude Desktop only. To choose, use
+# REA_CLIENTS="claude_desktop" or REA_CLIENTS="claude_code claude_desktop".
 #
 # Before you start: QUIT Claude Desktop fully (Cmd+Q) and close all Claude Code
 # sessions. They can write their config files again from memory.
@@ -86,13 +90,23 @@ export PATH="$N22:$PATH"
 NPX="$N22/npx"
 REA=( "$NPX" -y "rea-agents@$REA_VERSION" )
 
+if [ -z "${REA_CLIENTS:-}" ]; then
+  if command -v claude >/dev/null 2>&1 || [ -f "$HOME/.claude.json" ]; then
+    REA_CLIENTS="claude_code claude_desktop"
+  else
+    REA_CLIENTS="claude_desktop"
+  fi
+fi
+CLIENT_FLAGS=(); for c in $REA_CLIENTS; do CLIENT_FLAGS+=( --client "$c" ); done
+info "Clients: $REA_CLIENTS"
+
 doctor() {
   say "REA doctor (it shows all clients that REA knows)"
-  "${REA[@]}" doctor --client claude_code 2>&1 || true
-  info "Read only the claude_code and claude_desktop lines. 'missing' for copilot_cli or vscode is"
+  "${REA[@]}" doctor "${CLIENT_FLAGS[@]:0:2}" 2>&1 || true
+  info "Read only the lines of: $REA_CLIENTS. 'missing' for other clients (copilot_cli, vscode) is"
   info "correct: this script does not set up those clients. 'stale' is expected after step 3:"
   info "the probable cause is that the entry is not the same as what 'rea setup' writes. Do not run"
-  info "'rea setup' again for this reason. The real test is 'claude mcp get rea' (Connected)."
+  info "'rea setup' again for this reason. The real test: the REA tools show in a new chat."
 }
 need_quit() {
   if pgrep -x Claude >/dev/null 2>&1; then
@@ -134,25 +148,27 @@ JS
   say "Check: the rea command in each config file"
   "$N22/node" -e '
     const fs=require("fs"),path=require("path"),os=require("os");
-    for (const f of [path.join(os.homedir(),"Library/Application Support/Claude/claude_desktop_config.json"), path.join(os.homedir(),".claude.json")]) {
+    const want=process.argv[1]||"";
+    const all={claude_desktop:path.join(os.homedir(),"Library/Application Support/Claude/claude_desktop_config.json"), claude_code:path.join(os.homedir(),".claude.json")};
+    for (const f of Object.keys(all).filter(k=>want.split(" ").includes(k)).map(k=>all[k])) {
       let c="(no file)"; try { const d=JSON.parse(fs.readFileSync(f,"utf8")); c=(d.mcpServers&&d.mcpServers.rea&&d.mcpServers.rea.command)||"(no rea entry)"; } catch(e) { c="(cannot read: "+e.message+")"; }
       console.log("   "+(c.startsWith("/")?"OK  ":"FAIL")+" "+c+"   <- "+f);
-    }'
+    }' "$REA_CLIENTS"
 }
 case "${1:-}" in
   --doctor)  doctor; exit 0 ;;
   --dry-run) say "2. REA setup plan (dry run, no changes)"
-             "${REA[@]}" setup --client claude_code --client claude_desktop --dry-run; exit 0 ;;
+             "${REA[@]}" setup "${CLIENT_FLAGS[@]}" --dry-run; exit 0 ;;
   --fix-paths) need_quit; fix_paths; doctor; exit 0 ;;
 esac
 
 need_quit
 
-say "2. REA $REA_VERSION setup for Claude Code and Claude Desktop"
+say "2. REA $REA_VERSION setup for: $REA_CLIENTS"
 info "The first run downloads REA from npm (one or two minutes). Then REA shows its plan."
-info "Approve the plan for the 2 clients. You can say No to Hopper."
+info "Approve the plan. You can say No to Hopper."
 set +e
-"${REA[@]}" setup --client claude_code --client claude_desktop
+"${REA[@]}" setup "${CLIENT_FLAGS[@]}"
 RC=$?
 set -e
 [ "$RC" -eq 0 ] || info "REA setup ended with exit code $RC. The script continues with step 3."

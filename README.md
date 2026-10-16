@@ -14,6 +14,7 @@ The Claude skills and tools that I use on Claude desktop, Claude cloud sessions,
 | `install-rea-mac.sh` | Installs the REA server on a Mac for Claude Desktop and Claude Code. |
 | `tests/` | Test kit for the adapted skills, and the build script for the Java decompile test samples. |
 | `tests/TASK2-SAMPLES.md` | Where the Java test samples (JAR and WAR) come from, and how to run and verify the decompile test on a different Mac. |
+| `tests/VERIFY-ON-NEW-MAC.md` | Checklist to verify the skills, REA and the decompile skill on a Mac without Claude Code CLI. |
 | `tests/verify-task2-decompile.py` | Compares the decompile output with the original source. Shows PASS or FAIL for each check. |
 | `docs/TASK2-REPORT.html` | Result of the Java decompile test on Spring PetClinic. |
 
