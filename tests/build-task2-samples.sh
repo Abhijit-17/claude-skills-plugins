@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # build-task2-samples.sh
-# Build 2026-10-15.1
+# Build 2026-10-16.1
 #
 # Makes the 2 sample files for task 2 (reverse engineering), from open-source
 # code (Apache License 2.0):
@@ -15,6 +15,11 @@
 # It also keeps the original source in answer-key/. We use it ONLY to check
 # the decompiled result. Claude must not read answer-key/ during the test.
 #
+# Pinned commits (the same code on every Mac, so test results can be compared):
+#   spring-petclinic           500158f732419217507c7656904b8e6aa1bcc0d6 (2026-09-29)
+#   spring-framework-petclinic cf392920cdbe9cd07689f1f4b603271940bac957 (2026-10-05)
+# To use the newest code: JAR_COMMIT=HEAD WAR_COMMIT=HEAD bash build-task2-samples.sh
+#
 # Usage:  bash build-task2-samples.sh [target-folder]
 # Default target: ~/Downloads/WORKSPACE/SkillsPlugins/task2-samples
 # Needs: git, a JDK 17 or later, and internet (GitHub and Maven Central).
@@ -27,6 +32,8 @@ set -euo pipefail
 TARGET="${1:-$HOME/Downloads/WORKSPACE/SkillsPlugins/task2-samples}"
 JAR_REPO="https://github.com/spring-projects/spring-petclinic.git"
 WAR_REPO="https://github.com/spring-petclinic/spring-framework-petclinic.git"
+JAR_COMMIT="${JAR_COMMIT:-500158f732419217507c7656904b8e6aa1bcc0d6}"
+WAR_COMMIT="${WAR_COMMIT:-cf392920cdbe9cd07689f1f4b603271940bac957}"
 
 say()  { printf '%s\n' "$*"; }
 stop() { printf 'STOP: %s\n' "$*" >&2; exit 1; }
@@ -63,11 +70,17 @@ say ""
 
 MVN_FLAGS="-B -q -DskipTests -Dcheckstyle.skip=true -Dspring-javaformat.skip=true"
 
-build() {  # build <name> <repo-url> <artifact-glob> <output-name>
-  name="$1"; url="$2"; glob="$3"; out="$4"
+build() {  # build <name> <repo-url> <commit> <artifact-glob> <output-name>
+  name="$1"; url="$2"; commit="$3"; glob="$4"; out="$5"
   src="$TARGET/answer-key/$name"
-  say "[$name] $(date +%H:%M:%S) clone"
-  git clone -q --depth 1 "$url" "$src"
+  say "[$name] $(date +%H:%M:%S) clone (commit $commit)"
+  if [ "$commit" = HEAD ]; then
+    git clone -q --depth 1 "$url" "$src"
+  else
+    git init -q "$src"
+    git -C "$src" fetch -q --depth 1 "$url" "$commit" || stop "cannot get commit $commit from $url"
+    git -C "$src" checkout -q FETCH_HEAD
+  fi
   sha="$(git -C "$src" rev-parse --short HEAD)"
   say "[$name] $(date +%H:%M:%S) build (commit $sha). This can take some minutes."
   ( cd "$src" && chmod +x mvnw && ./mvnw $MVN_FLAGS package ) > "$TARGET/logs/$name-build.log" 2>&1 \
@@ -84,8 +97,8 @@ $(tail -25 "$TARGET/logs/$name-build.log")"
   say "[$name] $(date +%H:%M:%S) done: deployed/$out"
 }
 
-build spring-petclinic           "$JAR_REPO" "*.jar" petclinic-boot.jar
-build spring-framework-petclinic "$WAR_REPO" "*.war" petclinic-mvc.war
+build spring-petclinic           "$JAR_REPO" "$JAR_COMMIT" "*.jar" petclinic-boot.jar
+build spring-framework-petclinic "$WAR_REPO" "$WAR_COMMIT" "*.war" petclinic-mvc.war
 
 # ---- Summary ----------------------------------------------------------------
 summ() {  # summ <file> <expected-folder>
