@@ -1,0 +1,24 @@
+# Local-only files (kept on the Mac, not in this public repo)
+/task2-samples/
+/old-builds/
+/old-handoffs/
+/SESSION-*-HANDOFF.md
+/*.zip
+/run-skill-tests.sh
+/setup-skill-test-fixtures.sh
+/mattpocock-skills-test-plan.md
+/build-task2-samples.sh
+# Company artifacts must never be committed (public repo)
+real/
+*-decompiled-*/
+*.jar
+!skills-src/decompile-java-artifact/tools/cfr-0.152.jar
+*.war
+# Runtime data of the decompile skill
+**/cache/
+**/jre/
+**/_work/
+# OS and editor files
+.DS_Store
+*.swp
+__pycache__/

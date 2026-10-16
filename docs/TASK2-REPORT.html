@@ -1,0 +1,137 @@
+<meta charset="utf-8">
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Java Artifact Decompile Test</title>
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--line:#2a2f3a;--text:#e6e8ee;--muted:#9aa3b2;--accent:#7cc4ff;--good:#6fd39a;--warn:#f2c46d;--bad:#ff7b7b;--code:#1f2430}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+main{max-width:1000px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:36px 0 10px;color:var(--accent)}h3{font-size:16px;margin:22px 0 8px}
+.sub{color:var(--muted);margin:0 0 24px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.card b{display:block;font-size:22px}.card span{color:var(--muted);font-size:13px}
+.tbl{overflow-x:auto;margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--panel);color:var(--muted);font-weight:600}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:13px}
+pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;font-size:13px;line-height:1.45}
+.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.note{border-left:3px solid var(--warn);background:var(--panel);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:700px){.split{grid-template-columns:1fr}}
+.split>div{min-width:0}
+td code{overflow-wrap:anywhere}
+.lbl{font-size:12px;color:var(--muted);margin-bottom:4px}
+</style>
+</head>
+<body><main>
+<h1>Java artifact decompile test</h1>
+<p class="sub">Task 2, Skills Plugins and More. 2026-10-15. Samples: Spring PetClinic (Boot JAR) and Spring Framework PetClinic (WAR). Written in ASD-STE100.</p>
+
+<div class="cards">
+  <div class="card"><b class="good">100%</b><span>Classes, packages, resources, templates and JSP files recovered (both apps)</span></div>
+  <div class="card"><b class="good">0</b><span>Compile errors in CFR output (except 1 file that needs the server's Servlet API)</span></div>
+  <div class="card"><b>~7 s</b><span>Decompile time per artifact in the Claude desktop VM (Java 11, 3 GB RAM)</span></div>
+  <div class="card"><b class="warn">~38%</b><span>Of source lines lost: almost all are comments and Javadoc</span></div>
+</div>
+
+<h2>1. Result</h2>
+<p>The method works from the deployed file only. It runs in the Linux VM of the Claude desktop app, on your Mac. It needs no terminal, no CLI and no network. The decompiled code did not go to the cloud for the decompile step.</p>
+<p>Use <strong>CFR as the primary decompiler</strong>. Use JADX only to look up parameter names of interface methods.</p>
+
+<h2>2. Route</h2>
+<div class="tbl"><table>
+<tr><th>Step</th><th>Where</th><th>What</th></tr>
+<tr><td>Tools</td><td>Cloud → your folder</td><td>JADX 1.5.1 (127 MB, sent in 5 parts, SHA-256 checked) and CFR 0.152 (2 MB) in <code>SkillsPlugins/tools/</code>. Both run on Java 11.</td></tr>
+<tr><td>Decompile</td><td>Desktop VM (on your Mac)</td><td><code>bash decompile-java-artifact.sh &lt;file.jar|war&gt; &lt;out&gt;</code></td></tr>
+<tr><td>Explain</td><td>Claude reads the output</td><td>Permitted for real files (decision in section 7).</td></tr>
+<tr><td>Recompile check</td><td>Cloud (samples only)</td><td>The VM has Java 11; the libraries need 17. Open-source samples only. Never for your real files.</td></tr>
+</table></div>
+<p><strong>REA:</strong> not tested. REA lists APK only, needs Node 22+ and a terminal install, and the VM cannot reach npm. You said the work computer has no CLI. The VM route does not need REA.</p>
+
+<h2>3. Output layout (each app)</h2>
+<pre>decompiled/petclinic-boot/
+  pom.xml                 original pom, embedded by Maven in META-INF/maven/
+  pom-reconstructed.xml   made from lib/ (resolved list, also transitive)
+  DEPENDENCIES.md         each library: group, artifact, version, data source
+  COMPONENTS.md           explanation of each component, plus risks
+  DECOMPILE-REPORT.txt    counts, tool versions, warnings
+  src/main/java           CFR output
+  src/main/resources      config, SQL, i18n, templates (byte-identical to source)
+  src/main/webapp         WAR only: JSP, tags, static files (byte-identical)
+  _alt/jadx/src/main/java JADX output, for comparison
+  _meta/                  MANIFEST.MF, build-info, git.properties, SBOM, layers.idx</pre>
+
+<h2>4. Comparison with the answer key</h2>
+<div class="tbl"><table>
+<tr><th>Check</th><th>Boot JAR</th><th>WAR</th></tr>
+<tr><td>Main .java files (key / CFR / JADX)</td><td>30 / 30 / 30</td><td>47 / 47 / 47</td></tr>
+<tr><td>Package tree</td><td class="good">Same</td><td class="good">Same</td></tr>
+<tr><td>Test sources</td><td class="bad">20 lost (not in artifact)</td><td class="bad">14 lost</td></tr>
+<tr><td>pom.xml</td><td class="good">Byte-identical (embedded)</td><td class="good">Byte-identical (embedded)</td></tr>
+<tr><td>Resources / templates / JSP</td><td class="good">Identical (+ git.properties, made by the build)</td><td class="warn">Identical, except 3 config files with build-time values (section 5)</td></tr>
+<tr><td>Library coordinates</td><td class="good">92 of 93 exact (SBOM)</td><td class="warn">34 of 64 exact; 30 have no group (Gradle-built JARs have no pom.properties)</td></tr>
+<tr><td>Lines of Java (key / CFR / JADX)</td><td>1899 / 1184 / 1077</td><td>3114 / 1872 / 1686</td></tr>
+<tr><td>Comment lines in key (all lost)</td><td>723</td><td>1229</td></tr>
+<tr><td>Recompile errors: CFR</td><td class="good">0</td><td class="good">3, all in 1 file: Servlet API is <code>provided</code>, not in the WAR</td></tr>
+<tr><td>Recompile errors: JADX</td><td class="warn">1 (bridge method)</td><td class="bad">9 in 7 files (bridge methods, generics, lambda variable)</td></tr>
+<tr><td>Other files lost</td><td colspan="2">README, mvnw and <code>.mvn/</code>, Gradle files, <code>.github/</code> CI, <code>k8s/</code>, <code>docker-compose.yml</code>, <code>.editorconfig</code>. The artifact does not hold them.</td></tr>
+</table></div>
+
+<h3>Method bodies: 4 sample classes</h3>
+<p>I compared <code>PetValidator</code>, <code>OwnerController</code> (Boot), <code>CallMonitoringAspect</code> and <code>JdbcOwnerRepositoryImpl</code> (WAR) line by line after I removed comments. <strong>All CFR method bodies have the same behavior as the source.</strong> Only the form changes:</p>
+<div class="split">
+<div><div class="lbl">Source</div><pre>this.jdbcClient.sql("""
+    SELECT id, first_name, ...
+    FROM owners
+    WHERE last_name like :lastName
+    """)
+  .param("lastName", lastName + "%")</pre></div>
+<div><div class="lbl">CFR</div><pre>this.jdbcClient.sql("SELECT id, first_name, ...\nFROM owners\nWHERE last_name like :lastName\n")
+  .param("lastName", (Object)(lastName + "%"))</pre></div>
+</div>
+
+<h2>5. What the decompile loses or changes</h2>
+<div class="tbl"><table>
+<tr><th>Item</th><th>Effect</th><th>Seen in</th></tr>
+<tr><td>Comments, Javadoc, license headers</td><td>Lost. This is almost all of the line loss (Boot: 715 lines lost, 723 comment lines in the source).</td><td>All files</td></tr>
+<tr><td>Text blocks (<code>"""</code>)</td><td>Become one string with <code>\n</code>. SQL is harder to read.</td><td>JDBC repositories</td></tr>
+<tr><td>Compile-time constants</td><td>The value is put in place of the name: <code>name.length() &gt; 30</code> in place of <code>MAX_NAME_LENGTH</code>. The constant field stays.</td><td>PetValidator</td></tr>
+<tr><td>Generic type of local variables</td><td>Raw type: <code>List listOwners</code> in place of <code>List&lt;Owner&gt;</code>. It compiles, with warnings.</td><td>OwnerController, VetController</td></tr>
+<tr><td>Parameter names of interface methods</td><td>CFR: <code>var1</code>. JADX: real names (from the <code>MethodParameters</code> attribute).</td><td>All repositories, ClinicService</td></tr>
+<tr><td>Local variable names in methods</td><td class="good">Kept (Maven compiles with debug information).</td><td>All</td></tr>
+<tr><td>Control flow form</td><td><code>if/else</code> becomes a ternary; <code>synchronized(this)</code> becomes a local copy of <code>this</code>; extra casts <code>(Object)</code>; <code>this.</code> on each call.</td><td>CallMonitoringAspect, OwnerController</td></tr>
+<tr><td>Annotation form</td><td><code>@GetMapping("/x")</code> becomes <code>@GetMapping(value={"/x"})</code>. Field annotations are shown 2 times (declaration and type-use). It compiles.</td><td>All</td></tr>
+<tr><td>Formatting</td><td>Long chains are on one line.</td><td>All</td></tr>
+<tr><td>Lombok</td><td>Not in the samples. In your real apps, Lombok code shows as normal getters, setters and constructors. The <code>@Data</code> annotation is lost.</td><td>(expected)</td></tr>
+<tr><td>Build-time resource filtering</td><td class="bad">The deployed config holds the real values, not the <code>${...}</code> placeholders. In the WAR: DB driver, URL, user and password.</td><td>3 WAR config files</td></tr>
+<tr><td>Container libraries</td><td>Not in <code>lib/</code>. You must add them as <code>provided</code> to rebuild.</td><td>WAR (Servlet API)</td></tr>
+</table></div>
+
+<h2>6. CFR or JADX</h2>
+<div class="tbl"><table>
+<tr><th>Criterion</th><th>CFR 0.152</th><th>JADX 1.5.1</th></tr>
+<tr><td>Made for</td><td>JVM bytecode from javac</td><td>Android (Dalvik) bytecode; JVM input is converted</td></tr>
+<tr><td>Recompiles</td><td class="good">Yes (both apps)</td><td class="bad">No: 1 + 9 errors</td></tr>
+<tr><td><code>protected</code> methods</td><td class="good">Kept</td><td class="bad">Changed to <code>public</code></td></tr>
+<tr><td><code>try/finally</code></td><td class="good">Kept as <code>finally</code></td><td class="warn">Copied into try and catch branches</td></tr>
+<tr><td>Interface parameter names</td><td class="warn">var1, var2</td><td class="good">Real names</td></tr>
+<tr><td>Speed (these samples)</td><td>~3 s</td><td>~3 s</td></tr>
+</table></div>
+
+<h2>7. For your real WAR and JAR files</h2>
+<ol>
+<li>Put the file in a connected folder on the work computer (for example <code>SkillsPlugins/real/</code>).</li>
+<li>Copy <code>tools/</code> and <code>decompile-java-artifact.sh</code> to that computer. The VM there probably cannot download them.</li>
+<li>Ask Claude (desktop app, this Project) to run the script in the VM.</li>
+<li>Look first at: <code>src/main/resources</code> (secrets from filtering), <code>_meta/MANIFEST.MF</code>, <code>_meta/git.properties</code> (exact commit), <code>DEPENDENCIES.md</code> (CVE check).</li>
+<li>For Spring Boot 3.3+ JARs, the SBOM gives exact library coordinates. For WAR files, expect gaps in the group IDs.</li>
+</ol>
+<div class="note"><strong>Decision (2026-10-15).</strong> Decompiled code of your real files can go to Claude desktop chat and Anthropic. Claude can read the output and write <code>COMPONENTS.md</code>. The real file and the decompile run stay on your computer.</div>
+
+</main></body></html>
