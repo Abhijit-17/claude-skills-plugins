@@ -22,3 +22,5 @@ real/
 .DS_Store
 *.swp
 __pycache__/
+# Local prompt-audit workspaces (before/after copies, reports)
+/prompt-audit-*/

@@ -2,13 +2,13 @@
 name: decompile-java-artifact
 description: Reverse engineer a deployed Java JAR or WAR (Spring Boot fat JAR, classic Spring MVC WAR, plain JAR) when the source code is not available. Decompiles it into a repo-like folder (src/main/java, resources, webapp, pom.xml, dependency list), maps endpoints and wiring, scans for secrets, config and code risks and library CVEs, and explains each component. Use when the user gives a .jar or .war and asks to decompile it, reverse engineer it, recover its source, explain how it works, or audit it.
 metadata:
-  build: "2026-10-15.1"
+  build: "2026-10-20.1"
   tools: "CFR 0.152 (MIT, bundled)"
 ---
 
 # Decompile a Java artifact
 
-The user often has ONLY the deployed file (from DevOps, an app server or an AKS image). This skill turns it into readable source, a map, a risk report and an explanation.
+The user often has only the deployed file (from DevOps, an app server or an AKS image). This skill turns it into readable source, a map, a risk report and an explanation.
 
 ## Rules
 

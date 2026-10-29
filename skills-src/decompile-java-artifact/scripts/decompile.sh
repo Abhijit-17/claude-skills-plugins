@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# decompile.sh  (skill decompile-java-artifact, build 2026-10-15.1)
+# decompile.sh  (skill decompile-java-artifact, build 2026-10-20.1)
 #
 # Decompiles a deployed Java artifact (Spring Boot fat JAR, WAR, EAR-less plain
 # JAR) into a repo-like folder, then makes an inventory and a risk scan.
@@ -43,7 +43,7 @@ ROOT="$(cd "$HERE/.." && pwd -P)"
 CFR_JAR="$ROOT/tools/cfr-0.152.jar"
 CACHE="${DJA_CACHE:-$ROOT/cache}"
 XMX="${XMX:-2g}"
-BUILD="2026-10-15.1"
+BUILD="2026-10-20.1"
 
 stop() { printf 'STOP: %s\n' "$*" >&2; exit 1; }
 

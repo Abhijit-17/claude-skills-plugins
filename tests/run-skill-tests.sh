@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 # run-skill-tests.sh
-# Build 2026-10-15.1 (for skills build 2026-10-14.3)
+# Build 2026-10-29.1
+# 2026-10-15.2: T03 accepts the "Q1" question format (for example "**Q1** -").
+# 2026-10-28.1: --local mode tests local copies in ~/.claude/skills/ with the
+#   bare /<name> prefix (prompt audit, Phase 3b). The grader counts the
+#   RUNTIME.md reads, records the build of each read, flags a run that mixes
+#   builds, and writes results.json. Compare 2 runs with compare-skill-runs.py.
+# 2026-10-29.1: the build-mix check uses the folder that each skill loaded from
+#   (a bare name with no local copy loads the claude.ai copy; that is correct).
 #
 # Runs the automatable tests of the adapted Matt Pocock skills with
 # `claude -p` (headless mode), and grades the output.
@@ -22,6 +29,9 @@
 #   bash run-skill-tests.sh                 # all tests (approx. 20-40 min)
 #   bash run-skill-tests.sh --skip-arch     # skip the long architecture run
 #   MODEL=sonnet bash run-skill-tests.sh    # use a different model
+#   bash run-skill-tests.sh --local         # test local copies in ~/.claude/skills/
+#                                           # (bare /<name>; default is /anthropic-skills:<name>)
+#   LOCAL_BUILD=2026-10-20.1                # build that --local expects (this is the default)
 #
 # Works with the macOS default bash (3.2).
 
@@ -29,10 +39,12 @@ set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd -P)"
 SKIP_ARCH=0
+MODE=claudeai
 for a in "$@"; do
   case "$a" in
     --skip-arch) SKIP_ARCH=1 ;;
-    -h|--help) sed -n '2,25p' "$0"; exit 0 ;;
+    --local) MODE=local ;;
+    -h|--help) sed -n '2,33p' "$0"; exit 0 ;;
     *) echo "Unknown option: $a" >&2; exit 1 ;;
   esac
 done
@@ -40,7 +52,8 @@ done
 TIMEOUT_SECS="${TIMEOUT_SECS:-900}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 RESULTS_ROOT="${RESULTS_ROOT:-$HOME/skills-test-results}"
-RUN="$RESULTS_ROOT/run-$STAMP"
+RUN_NAME="run-$STAMP-$MODE"
+RUN="$RESULTS_ROOT/$RUN_NAME"
 FX="$RUN/fx"
 RAW="$RUN/raw"
 TMPD="${TMPDIR:-/tmp}"
@@ -68,9 +81,31 @@ done
 
 case "$RUN" in *" "*) stop "The results path has a space: $RUN" ;; esac
 
+# Skill prefix and local-copy preflight.
+# claudeai: /anthropic-skills:<name> (the build uploaded to claude.ai). No local copy
+#           may exist, because a skill that loads another skill by its bare name
+#           would then get the local copy.
+# local:    /<name>. Each of the 8 names must have a local copy of LOCAL_BUILD.
+NAMES8="grill-with-docs grilling domain-modeling codebase-design improve-codebase-architecture two-axis-review pr handoff"
+LOCAL_BUILD="${LOCAL_BUILD:-2026-10-20.1}"
+if [ "$MODE" = local ]; then
+  P=""
+  for n in $NAMES8; do
+    f="$HOME/.claude/skills/$n/SKILL.md"
+    [ -f "$f" ] || stop "--local: $f is missing. Copy the new build to ~/.claude/skills/ first."
+    grep -q "build: \"$LOCAL_BUILD\"" "$f" || stop "--local: $f is not build $LOCAL_BUILD."
+  done
+else
+  P="anthropic-skills:"
+  for n in $NAMES8; do
+    [ -e "$HOME/.claude/skills/$n" ] && stop "~/.claude/skills/$n exists. It mixes builds. Move it away, or use --local."
+  done
+fi
+
 mkdir -p "$RAW"
 say "Run folder: $RUN"
 say "Claude:     $(claude --version 2>/dev/null | head -1)"
+say "Mode:       $MODE (prefix: /${P}<name>)"
 say ""
 say "Making fresh fixtures..."
 bash "$FIXTURE_SCRIPT" "$FX" > "$RUN/fixtures.log" 2>&1 || stop "fixture script failed. See $RUN/fixtures.log"
@@ -131,12 +166,12 @@ PY
 # Runs
 ###########################################################################
 R="$FX/review-fixture"
-run_claude R01-review   "$R" "/anthropic-skills:two-axis-review main"
-run_claude R02-shallow  "$FX/review-fixture-shallow" "/anthropic-skills:two-axis-review main use no sub-agents"
+run_claude R01-review   "$R" "/${P}two-axis-review main"
+run_claude R02-shallow  "$FX/review-fixture-shallow" "/${P}two-axis-review main use no sub-agents"
 run_claude R03-pr       "$R" "Write a PR body for this branch."
-run_claude R04-handoff  "$R" "/anthropic-skills:handoff next session fixes the review findings"
+run_claude R04-handoff  "$R" "/${P}handoff next session fixes the review findings"
 
-run_claude R05-grill    "$FX/grill-fixture" "/anthropic-skills:grill-with-docs grill the plan in PLAN.md"
+run_claude R05-grill    "$FX/grill-fixture" "/${P}grill-with-docs grill the plan in PLAN.md"
 SID="$(session_id R05-grill)"
 if [ -n "$SID" ]; then
   run_claude R05b-grill-yes "$FX/grill-fixture" "Yes. I accept all your recommended answers for this round." "$SID"
@@ -144,12 +179,12 @@ else
   mkdir -p "$RAW/R05b-grill-yes"; echo "no session id from R05" > "$RAW/R05b-grill-yes/stderr.txt"
 fi
 
-run_claude R06-legacy   "$FX/legacy-glossary-fixture" "/anthropic-skills:grill-with-docs grill the plan in PLAN.md"
+run_claude R06-legacy   "$FX/legacy-glossary-fixture" "/${P}grill-with-docs grill the plan in PLAN.md"
 run_claude R07-noarch   "$FX/arch-fixture" "What do you think of the architecture of this code? Answer in 5 lines."
 run_claude R08-nohandoff "$FX/arch-fixture" "I must stop now. What do I do next time? Answer in 3 lines."
-run_claude R09-handoff-own "$FX/handoff-fixture" "/anthropic-skills:handoff next session reviews the discount branch"
+run_claude R09-handoff-own "$FX/handoff-fixture" "/${P}handoff next session reviews the discount branch"
 if [ "$SKIP_ARCH" -eq 0 ]; then
-  run_claude R10-arch   "$FX/arch-fixture" "/anthropic-skills:improve-codebase-architecture"
+  run_claude R10-arch   "$FX/arch-fixture" "/${P}improve-codebase-architecture"
 fi
 
 ###########################################################################
@@ -161,6 +196,9 @@ import json, os, re, sys, glob
 RUN = sys.argv[1]
 RAW = os.path.join(RUN, "raw")
 TMPD = sys.argv[2].rstrip("/")
+MODE = sys.argv[3] if len(sys.argv) > 3 else "claudeai"
+LOCAL_BUILD = sys.argv[4] if len(sys.argv) > 4 else "2026-10-20.1"
+BUILD_RE = re.compile(r'(?:Build:|build:)\s*"?(\d{4}-\d{2}-\d{2}\.\d+)')
 NAMES8 = ["grill-with-docs", "grilling", "domain-modeling", "codebase-design",
           "improve-codebase-architecture", "two-axis-review", "pr", "handoff"]
 
@@ -183,6 +221,9 @@ class Run:
         self.denied = []
         self.is_error = None
         self.cost = None
+        self.tool_ids = {}       # tool_use id -> (name, input)
+        self.runtime_reads = []  # (path, build of that RUNTIME.md)
+        self.builds_seen = set()
         for line in rd(os.path.join(self.dir, "stream.jsonl")).splitlines():
             try:
                 d = json.loads(line)
@@ -197,6 +238,7 @@ class Run:
                         self.texts.append(c.get("text", ""))
                     elif c.get("type") == "tool_use":
                         self.tools.append((c.get("name", ""), c.get("input") or {}))
+                        self.tool_ids[c.get("id")] = (c.get("name", ""), c.get("input") or {})
             elif t == "user":
                 content = (d.get("message") or {}).get("content")
                 if isinstance(content, str):
@@ -204,23 +246,62 @@ class Run:
                 for c in content if isinstance(content, list) else []:
                     if c.get("type") == "text":
                         self.user_texts.append(c.get("text", ""))
-                    if c.get("type") == "tool_result" and c.get("is_error"):
+                    if c.get("type") == "tool_result":
                         body = c.get("content")
                         if isinstance(body, list):
                             body = " ".join(x.get("text", "") for x in body if isinstance(x, dict))
                         body = str(body)
-                        if re.search(r"permission|not allowed|denied", body, re.I):
+                        if c.get("is_error") and re.search(r"permission|not allowed|denied", body, re.I):
                             self.denied.append(body[:160])
+                        tu = self.tool_ids.get(c.get("tool_use_id"))
+                        if tu and tu[0] == "Read" and str(tu[1].get("file_path", "")).endswith("RUNTIME.md"):
+                            m = re.search(r"Build:\s*(\S+)", body)
+                            self.runtime_reads.append((str(tu[1].get("file_path", "")), m.group(1) if m else "?"))
+                        for b in BUILD_RE.findall(body):
+                            self.builds_seen.add(b)
             elif t == "result":
                 self.final = d.get("result") or ""
                 self.is_error = d.get("is_error")
                 self.cost = d.get("total_cost_usd")
         self.all = "\n".join(self.texts + [self.final])
+        for u in self.user_texts:
+            for b in BUILD_RE.findall(u):
+                self.builds_seen.add(b)
         self.stderr = rd(os.path.join(self.dir, "stderr.txt"))
         self.exit = rd(os.path.join(self.dir, "exit.txt")).strip()
         self.git_status = rd(os.path.join(self.dir, "git-status.txt")).strip()
         self.shallow = rd(os.path.join(self.dir, "git-shallow.txt")).strip()
         self.tmp_new = [x for x in rd(os.path.join(self.dir, "tmp-new.txt")).splitlines() if x.strip()]
+
+    def skill_calls(self):
+        return [str(i.get("skill") or i.get("command") or i.get("name") or "") for n, i in self.tools if n == "Skill"]
+
+    def skill_dirs(self):
+        return re.findall(r"Base directory for this skill: (\S+)", "\n".join(self.user_texts))
+
+    def runtime_bash(self):
+        return [c for c in self.bash() if "RUNTIME.md" in c]
+
+    def mixed(self):
+        """Reasons why this run used a build other than the one under test."""
+        why = []
+        # Judge by where the CLI loaded each skill from ("Base directory for this
+        # skill"), not by the name in the Skill call: with no local copy, a bare
+        # name loads the claude.ai copy from ~/.claude/skills/synced/ (2026-10-29.1).
+        for d in self.skill_dirs():
+            if os.path.basename(d.rstrip("/")) in NAMES8:
+                synced = "/skills/synced/" in d or "/mnt/skills/" in d
+                if MODE == "local" and synced:
+                    why.append("loaded " + d)
+                if MODE != "local" and not synced:
+                    why.append("loaded " + d)
+        for p, b in self.runtime_reads:
+            synced = "/skills/synced/" in p or "/mnt/skills/" in p
+            if MODE == "local" and (synced or (b not in ("?", LOCAL_BUILD))):
+                why.append("read %s (build %s)" % (p, b))
+            if MODE != "local" and b == LOCAL_BUILD:
+                why.append("read %s (build %s)" % (p, b))
+        return why
 
     def tool_names(self):
         return [n for n, _ in self.tools]
@@ -291,10 +372,12 @@ if r1.exists and r1.init:
     shown = ", ".join("%s=%d" % (n, c) for n, c in counts.items())
     if not pool:
         add("T01 Skill inventory", "CHECK", "init message has no skill list in this Claude version")
-    elif all(c == 1 for c in counts.values()):
+    elif MODE != "local" and all(c == 1 for c in counts.values()):
         add("T01 Skill inventory", "P", shown)
+    elif MODE == "local" and all(n in pool and c == 2 for n, c in counts.items()):
+        add("T01 Skill inventory", "P", shown + " (local mode: bare + prefixed = 2)")
     else:
-        add("T01 Skill inventory", "F", shown + " (each must be 1)")
+        add("T01 Skill inventory", "F", shown + (" (each must be 2, with the bare name)" if MODE == "local" else " (each must be 1)"))
 else:
     add("T01 Skill inventory", "-", "R01 has no init message")
 
@@ -393,7 +476,7 @@ r5 = Run("R05-grill")
 if need(r5, "T03 Load chain"):
     lg = r5.loaded("grilling")
     ld = r5.loaded("domain-modeling")
-    numbered = has(r"(^|\n)\s*(\*\*|#+\s*)?Q?1[\.\):]", r5.final)
+    numbered = has(r"\bQ\s?1\b", r5.final) or has(r"(^|\n)\s*(\*\*|#+\s*)?Q?1[\.\):]", r5.final)
     rec = ("➡" in r5.final) or has(r"recommend", r5.final)
     old = "CONTEXT.md" in r5.final
     install = has(r"Install the \S+ skill", r5.all)
@@ -488,7 +571,7 @@ out.append("# Skill test results (headless)\n")
 out.append("Run folder: `%s`  " % RUN)
 init = r1.init or {}
 out.append("Claude: %s, model: %s  " % (init.get("claude_code_version", "?"), init.get("model", "?")))
-out.append("Skills build under test: 2026-10-14.3\n")
+out.append("Mode: %s (%s)\n" % (MODE, "local copies in ~/.claude/skills/, build " + LOCAL_BUILD if MODE == "local" else "claude.ai build, /anthropic-skills:<name>"))
 out.append("| Test | Surface | Result | Evidence |")
 out.append("|---|---|---|---|")
 for t, s, r, e in RESULTS:
@@ -511,16 +594,41 @@ for d in sorted(os.listdir(RAW)):
         ", ".join("%s x%d" % kv for kv in sorted(tools.items())) or "none",
         ("; ".join(r.denied))[:200].replace("|", "/") or "none"))
 out.append("\nTotal cost estimate: %.2f USD (on a subscription, this is usage, not a bill)." % total)
+out.append("\n## RUNTIME.md reads and builds (measures H01)\n")
+out.append("R05 and R05b are one session. A build mix makes the run invalid for the A/B.\n")
+out.append("| Run | Skill calls | RUNTIME.md Read calls | Builds of those reads | RUNTIME.md in Bash | Builds seen | Build mix |")
+out.append("|---|---|---|---|---|---|---|")
+runs_json = {}
+total_reads = 0
+any_mix = False
+for d in sorted(os.listdir(RAW)):
+    r = Run(d)
+    mix = r.mixed()
+    any_mix = any_mix or bool(mix)
+    total_reads += len(r.runtime_reads)
+    out.append("| %s | %s | %d | %s | %d | %s | %s |" % (
+        d, ", ".join(r.skill_calls()) or "none", len(r.runtime_reads),
+        ", ".join(b for _, b in r.runtime_reads) or "-", len(r.runtime_bash()),
+        ", ".join(sorted(r.builds_seen)) or "-", ("MIX: " + "; ".join(mix)).replace("|", "/") if mix else "no"))
+    runs_json[d] = {"skill_calls": r.skill_calls(), "runtime_reads": r.runtime_reads,
+                    "runtime_bash": r.runtime_bash(), "builds_seen": sorted(r.builds_seen),
+                    "mixed": mix, "cost": r.cost, "exit": r.exit}
+out.append("\nTotal RUNTIME.md Read calls: %d (one read is about 1,616 tokens). Build mix in any run: %s." % (total_reads, "YES" if any_mix else "no"))
+json.dump({"mode": MODE, "local_build": LOCAL_BUILD, "claude_version": init.get("claude_code_version", "?"),
+           "model": init.get("model", "?"),
+           "results": [{"test": t, "surface": su, "result": re_, "evidence": e} for t, su, re_, e in RESULTS],
+           "runs": runs_json, "total_runtime_reads": total_reads, "any_mix": any_mix},
+          open(os.path.join(RUN, "results.json"), "w"), indent=1)
 open(os.path.join(RUN, "results.md"), "w").write("\n".join(out) + "\n")
 print("\n".join(out))
 PY
 
 say ""
 say "Grading..."
-python3 "$RUN/grade.py" "$RUN" "$TMPD"
+python3 "$RUN/grade.py" "$RUN" "$TMPD" "$MODE" "$LOCAL_BUILD"
 
-( cd "$RESULTS_ROOT" && zip -qr "run-$STAMP.zip" "run-$STAMP" -x "run-$STAMP/fx/*/.git/*" )
+( cd "$RESULTS_ROOT" && zip -qr "$RUN_NAME.zip" "$RUN_NAME" -x "$RUN_NAME/fx/*/.git/*" )
 say ""
 say "Done."
 say "Results: $RUN/results.md"
-say "Send this ZIP to Claude in the Project: $RESULTS_ROOT/run-$STAMP.zip"
+say "Send this ZIP to Claude in the Project: $RESULTS_ROOT/$RUN_NAME.zip"
