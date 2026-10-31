@@ -9,7 +9,7 @@ The Claude skills and tools that I use on Claude desktop, Claude cloud sessions,
 | `skills/` | Skill zips. Upload in claude.ai: **Customize > Skills**. |
 | `skills/grill-with-docs.zip`, `grilling.zip`, `domain-modeling.zip`, `codebase-design.zip`, `improve-codebase-architecture.zip`, `two-axis-review.zip`, `pr.zip`, `handoff.zip` | Adapted Matt Pocock skills, build 2026-10-30.1. |
 | `skills/decompile-java-artifact.zip` | My skill: decompile a deployed Java JAR or WAR into a repo, map it, scan it for risks, explain it. |
-| `skills/reverse-engineer-anything.zip` | The REA skill (from REA 6.5.0). It needs the REA server: see [INSTALL-REA.md](INSTALL-REA.md). |
+| `skills/reverse-engineer-anything.zip` | The REA skill (from REA 6.8.0). It needs the REA server: see [INSTALL-REA.md](INSTALL-REA.md). |
 | `skills-src/decompile-java-artifact/` | Source of the decompile skill. |
 | `install-rea-mac.sh` | Installs the REA server on a Mac for Claude Desktop and Claude Code. |
 | `tests/` | Test kit for the adapted skills (`run-skill-tests.sh`; `--local` tests copies in `~/.claude/skills/` before an upload; `compare-skill-runs.py` compares 2 runs), and the build script for the Java decompile test samples. |

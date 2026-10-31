@@ -1,6 +1,6 @@
 # Install REA on a Mac
 
-REA (Reverse Engineer Anything, [github.com/morluto/rea](https://github.com/morluto/rea), MIT) is a local MCP server. This guide installs REA 6.5.0 for **Claude Desktop** and **Claude Code** with `install-rea-mac.sh` (build 2026-10-16.4). Written in ASD-STE100.
+REA (Reverse Engineer Anything, [github.com/morluto/rea](https://github.com/morluto/rea), MIT) is a local MCP server. This guide installs REA 6.8.0 for **Claude Desktop** and **Claude Code** with `install-rea-mac.sh` (build 2026-10-31.1). Written in ASD-STE100.
 
 ## Before you start
 
@@ -12,7 +12,7 @@ REA (Reverse Engineer Anything, [github.com/morluto/rea](https://github.com/morl
 | Time | 2 to 5 minutes. |
 | Disk | About 200 MB (Node 22 and the REA package). |
 
-The script downloads the official Node 22 build into `~/.local/share/rea-node` and checks its SHA-256. Your default `node` (for example Node 18) does not change.
+The script downloads the official Node 22 build into `~/.local/share/rea-node` and checks its SHA-256. Your default `node` (for example Node 18) does not change. REA 6.8.0 needs Node 22.23.4 or later. If the copy from an older build of the script is older, the script downloads a new Node 22.
 
 ## Steps
 
@@ -51,7 +51,7 @@ Do all 5 checks. If a check fails, see [Problems](#problems).
 | 2 | Config files | `grep -c '"rea"' ~/.claude.json "$HOME/Library/Application Support/Claude/claude_desktop_config.json"` | A number of 1 or more for each file. |
 | 3 | Node path in config | `grep -A2 '"rea"' "$HOME/Library/Application Support/Claude/claude_desktop_config.json"` | `"command"` shows the full path that ends in `rea-node/current/bin/npx` (or a different Node 22 `npx`). It is not only `npx`. |
 | 4 | Claude Code (skip if Claude Code is not installed) | In Terminal: `claude mcp list`. Then in a Claude Code session: `/mcp`. | `rea` shows `✓ Connected` (`/mcp` shows `connected`). The command starts with the full Node 22 path, for example `/Users/<you>/.local/share/rea-node/current/bin/npx`. If it starts with only `npx`, see the note below this table. |
-| 5 | Claude Desktop | Start Claude Desktop. Open **Settings > Developer**. Then, in a new chat, ask: **"Use REA to open ~/Downloads/WORKSPACE/SkillsPlugins/pr.zip and inspect it."** | **Settings > Developer** shows `rea` as `running`. Claude calls `open_binary` and `inspect_artifact`, and shows 5 entries in the archive. |
+| 5 | Claude Desktop | Start Claude Desktop. Open **Settings > Developer**. Then, in a new chat, ask: **"Use REA to open ~/Downloads/WORKSPACE/SkillsPlugins/pr.zip and inspect it."** | **Settings > Developer** shows `rea` as `running`. Claude calls `open_binary` and `inspect_artifact`, and shows 3 files in the archive: `pr/SKILL.md`, `pr/LICENSE.txt`, `pr/CREDITS.md`. |
 
 About `state: stale` in check 1: `rea setup` writes only `npx`. Step 3 of the script changes it to the full Node 22 path and adds a `PATH`. The probable cause of `stale` is that the entry is now not the same as the entry that `rea setup` writes. If checks 4 and 5 are correct, `stale` is not a problem. Do not run `rea setup` again for this reason: it can set the command back to only `npx`. If you do run it, run `bash install-rea-mac.sh --fix-paths` after it.
 
@@ -85,7 +85,7 @@ bash install-rea-mac.sh
 
 | Place | Change |
 |---|---|
-| `~/.local/share/rea-node/` | Node 22 (official build), only if no Node 22.19+ is found. |
+| `~/.local/share/rea-node/` | Node 22 (official build), only if no Node 22.23.4+ is found. |
 | `~/Library/Application Support/Claude/claude_desktop_config.json` | REA setup adds `mcpServers.rea`. The script then sets its command to the full Node 22 `npx` path. A backup is made first (`*.bak-rea-<time>`). |
 | `~/.claude.json` | The same for Claude Code. Only if Claude Code is installed (the `claude` command or `~/.claude.json` is found). |
 | npm cache (`~/.npm`) | The REA package. |

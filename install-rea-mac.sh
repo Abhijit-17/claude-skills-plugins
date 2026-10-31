@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install-rea-mac.sh  (build 2026-10-16.4)
+# install-rea-mac.sh  (build 2026-10-31.1)
 #
 # Installs REA (Reverse Engineer Anything, github.com/morluto/rea, MIT) on a Mac
 # for Claude Desktop and Claude Code. No sudo, no Homebrew, no compile.
@@ -11,12 +11,15 @@
 #   bash install-rea-mac.sh --fix-paths only do step 3 (full Node 22 path) and step 4
 #
 # Steps:
-#   1. Node 22: uses a Node 22.19+ that is already here (this script's own copy,
+#   1. Node 22: uses a Node 22.23.4+ that is already here (this script's own copy,
 #      or Homebrew node@22 if it is complete). Else it downloads the official
 #      Node 22 build from nodejs.org into ~/.local/share/rea-node, checks its
 #      SHA-256, and unpacks it. Your default "node" (for example Node 18) does
 #      not change. (Build 2026-10-15.1 used "brew install node@22". On some
 #      Intel Macs Homebrew compiles Node from source, which takes hours.)
+#      REA 6.8.0 needs Node ^22.23.4 || ^24.22.1 || >=26.12.1. If this script's
+#      own copy is older (builds before 2026-10-31.1 accepted 22.19+), it
+#      downloads the latest Node 22 and points ~/.local/share/rea-node/current to it.
 #   2. REA setup for Claude Code and Claude Desktop, chosen with --client
 #      flags (no menu). REA shows its plan; you approve it. If REA offers to
 #      install Hopper, you can say No: it is not needed for JavaScript, .NET,
@@ -36,7 +39,7 @@
 # Needs internet access to nodejs.org and registry.npmjs.org.
 
 set -euo pipefail
-REA_VERSION="${REA_VERSION:-6.5.0}"
+REA_VERSION="${REA_VERSION:-6.8.0}"
 NODE_MAJOR=22
 NODE_HOME_BASE="${REA_NODE_DIR:-$HOME/.local/share/rea-node}"
 T0=$(date +%s)
@@ -54,8 +57,8 @@ case "$(uname -m)" in
 esac
 command -v curl >/dev/null || stop "curl not found."
 
-node_ok() {  # node_ok <dir-with-node>  -> true if node there is 22.19+
-  [ -x "$1/node" ] && "$1/node" -e 'const [a,b]=process.versions.node.split(".").map(Number);process.exit(a>22||(a===22&&b>=19)?0:1)' 2>/dev/null
+node_ok() {  # node_ok <dir-with-node>  -> true if node there is ^22.23.4 || ^24.22.1 || >=26.12.1
+  [ -x "$1/node" ] && "$1/node" -e 'const [a,b,c]=process.versions.node.split(".").map(Number);const ge=(x,y,z)=>b>y||(b===y&&c>=z);process.exit((a===22&&ge(22,23,4))||(a===24&&ge(24,22,1))||(a===26&&ge(26,12,1))||a>26?0:1)' 2>/dev/null
 }
 
 # ---- 1. Node 22 -------------------------------------------------------------
