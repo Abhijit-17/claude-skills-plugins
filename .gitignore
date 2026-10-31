@@ -24,3 +24,5 @@ real/
 __pycache__/
 # Local prompt-audit workspaces (before/after copies, reports)
 /prompt-audit-*/
+# Local skill build workspaces (sources, zips, check output)
+/skills-work/
