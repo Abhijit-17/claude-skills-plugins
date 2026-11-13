@@ -10,7 +10,9 @@ The Claude skills and tools that I use on Claude desktop, Claude cloud sessions,
 | `skills/grill-with-docs.zip`, `grilling.zip`, `domain-modeling.zip`, `codebase-design.zip`, `improve-codebase-architecture.zip`, `two-axis-review.zip`, `pr.zip`, `handoff.zip` | Adapted Matt Pocock skills, build 2026-10-30.1. |
 | `skills/decompile-java-artifact.zip` | My skill: decompile a deployed Java JAR or WAR into a repo, map it, scan it for risks, explain it. |
 | `skills/reverse-engineer-anything.zip` | The REA skill (from REA 6.8.0). It needs the REA server: see [INSTALL-REA.md](INSTALL-REA.md). |
+| `skills/content-triage.zip` | My skill: watch a short list of YouTube and X sources, and sort each new item into Learn, Skill, Mindset or Skip against my goals. Needs the Claude desktop app's built-in browser. |
 | `skills-src/decompile-java-artifact/` | Source of the decompile skill. |
+| `skills-src/content-triage/`, `content-triage/` | Source of the content-triage skill, and its design glossary and ADRs. |
 | `install-rea-mac.sh` | Installs the REA server on a Mac for Claude Desktop and Claude Code. |
 | `tests/` | Test kit for the adapted skills (`run-skill-tests.sh`; `--local` tests copies in `~/.claude/skills/` before an upload; `compare-skill-runs.py` compares 2 runs), and the build script for the Java decompile test samples. |
 | `tests/TASK2-SAMPLES.md` | Where the Java test samples (JAR and WAR) come from, and how to run and verify the decompile test on a different Mac. |

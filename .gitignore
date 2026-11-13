@@ -26,3 +26,5 @@ __pycache__/
 /prompt-audit-*/
 # Local skill build workspaces (sources, zips, check output)
 /skills-work/
+# Personal data of the content-triage skill (ADR 0004): never in this public repo
+/content-triage/data/
