@@ -8,6 +8,7 @@
 /setup-skill-test-fixtures.sh
 /mattpocock-skills-test-plan.md
 /build-task2-samples.sh
+/managed-skills.md
 # Company artifacts must never be committed (public repo)
 real/
 *-decompiled-*/
