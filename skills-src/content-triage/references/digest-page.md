@@ -5,13 +5,13 @@ The **Digest Page** is one private artifact page with a fixed link. Each run upd
 ## Build the page
 
 1. Load the `artifact-design` skill before you write the page (or follow the Artifact tool's page contract if no such skill exists).
-2. Make one self-contained HTML file from today's digest. Write it in the session's working folder (not in the Data Folder; the page is generated, not a record).
+2. Make one self-contained HTML file from today's digest. Write it to `DATA/digest-page/index.html` (with a temp file and a rename). The cloud session can stage this file and publish it. The Data Folder's `.gitignore` ignores this folder: the page is generated, not a record. If the `.gitignore` line `/digest-page/` is missing, add it.
 3. Page rules from the user:
    - The first line is `<meta charset="utf-8">`.
    - **Dark theme only.** No light theme, no `prefers-color-scheme` switch, no theme toggle. Set the background and text colours on `:root` and `body`.
    - Write the text in the `language` of `config.md` (default ASD-STE100).
    - Phone width must work: 16 px side gutter, no side scroll.
-4. Content, in the same order as the digest: the counts line, Action needed, Top pick, Open proposals (with the IDs in `code` style, so the user can copy them), Learn, Skill bucket, Mindset (each Short Read in full), Revisit, More, Skip (closed by default with `<details>`), Problems. Show Paired Proposals together in the section of their main bucket, with the "Paired with" line and both IDs in `code` style.
+4. Content, in the same order as the digest. The page always shows the full Weak Fit lines, also when the Markdown digest shows only counts (run.md, Step 7): the counts line, Action needed, Top pick, Open proposals (with the IDs in `code` style, so the user can copy them), Learn, Skill bucket, Mindset (each Short Read in full), Revisit, More, Skip (closed by default with `<details>`), Problems. Show Paired Proposals together in the section of their main bucket, with the "Paired with" line and both IDs in `code` style.
 5. All links open the original item. Show the marks ("no transcript", "link not read", "⚠ injection text") as small labels.
 6. At the end: "Earlier digests" with the dates of the last 10 digests (text only; the files are on the Mac). And one line: "Reply in a chat in the Skills Plugins and More project: approve, reject, promote, kept, drop, status."
 7. Do not put the content of `GOALS.md` on the page. Show only the short goal name of each item ("fits: distributed systems").

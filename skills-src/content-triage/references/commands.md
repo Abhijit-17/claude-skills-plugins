@@ -12,7 +12,7 @@ Run it one time. Never overwrite a file that exists. Ask before each change outs
 
 1. Find the public repo folder (`SkillsPlugins`) and `content-triage/` in it.
 2. Check that the public repo's `.gitignore` has the line `/content-triage/data/`. If not, ask, then add it, before any file goes into `data/`. Check with `git check-ignore -v content-triage/data/x.md`.
-3. Create the folders `data/digests/`, `data/reads/`, `data/state/`, the empty files `state/seen.jsonl` and `state/cursors.json` (`{}`), and `git init` in `data/` (branch `main`). Tell the user to make the first commit from the Mac Terminal.
+3. Create the folders `data/digests/`, `data/reads/`, `data/state/`, `data/digest-page/`, the file `data/.gitignore` with the line `/digest-page/`, the empty files `state/seen.jsonl` and `state/cursors.json` (`{}`), and `git init` in `data/` (branch `main`). Tell the user to make the first commit from the Mac Terminal.
 4. If `GOALS.md`, `sources.md` or `config.md` is missing, write a draft (formats: [files.md](files.md)). Ask the user to edit `GOALS.md` (add life goals) and to fill in `sources.md`.
 5. Browser: ask the user to open the built-in browser of the Claude desktop app, sign in to youtube.com and x.com, and approve both sites for Claude. A run never signs in by itself.
 6. Folders for the scheduled task: `SkillsPlugins` (for the Data Folder) and `~/Downloads/LEARNING` (read-only use, for the course missions).
@@ -55,6 +55,32 @@ The user can give one ID, several IDs, or a group ("all Learn from this week"). 
 2. Read the item again, if needed. Write the full output for its bucket now: a Short Read (with a new `R-` ID of today) or a Proposal (with a new `L-` or `S-` ID of today). Test the item for Paired Proposals ([triage.md](triage.md), section 4). If it passes, write both Paired Proposals, each with the "Paired with" line. A Weak Fit item (fit score 1) never passes this test. It gets one output, as before. `promote` does not change the fit score.
 3. Update the ledger line (`status`, `read` or `proposal`; for Paired Proposals also `paired` and `paired_status`).
 4. Show the new output in the chat. It also goes into the next digest under "Open proposals" (for a Proposal).
+
+## promote <key> skill
+
+For an item with the main bucket Mindset that is also a good skill (ADR 0006). The user gives this command; a run never does it by itself.
+
+1. The key is `yt:...` or `x:...`. The ledger line must have `bucket` = `Mindset` and no `proposal`. Its `status` can be `done` (it has a Short Read), `weak` or `more`. For other lines, tell the user the bucket and status and stop. (For a Learn item, the Paired Proposal test of [triage.md](triage.md) already applies.)
+2. Read the item again, if needed (for `part_read` or `fast_triage`: the full read first).
+3. Check that Claude can do the method (the "Choose it when" test of the Skill bucket). If not, tell the user why and stop. Change no file.
+4. Write a Skill-bucket Proposal (`S-TODAY-N`, template in [triage.md](triage.md), section 7), with the line `**From Mindset item:** <key>` and the Short Read ID, if any. Compare with the existing skills first. This Proposal does not count against the daily limits.
+5. Update the ledger line: `proposal` = the new ID, `status` = `open`. Keep `bucket` = `Mindset`, the fit score and `read`. Add a note `S-...: from Mindset`.
+6. Show the Proposal in the chat. It also goes into "Open proposals" of the next digest. The work starts only after `approve <ID>`.
+
+## add <url> [<url> ...]
+
+Triage links that the user gives in the chat (YouTube videos or X posts).
+
+1. Make the key of each link (`yt:<id>` or `x:<id>`). If the key is in the Seen Ledger, show its bucket, status and IDs, and do not triage it again.
+2. Read each new item ([reading.md](reading.md)) and triage it ([triage.md](triage.md)), with `from` = `chat`.
+3. Each item with a fit score of `min_fit_for_full_output` or more gets its full output. The user asked for these items, so they do not count against the daily limits. Paired Proposals apply as in a run.
+4. Add the ledger lines. Update today's digest (create it if it does not exist), and the Digest Page. Do not move a Cursor.
+5. Show the outputs in the chat.
+
+## catch-up on / catch-up off
+
+1. Set `catch_up = yes` or `catch_up = no` in `config.md` (temp file and rename). Change no other key.
+2. Tell the user the limits that now apply (from [files.md](files.md)).
 
 ## kept <R-ID> / drop <R-ID>
 

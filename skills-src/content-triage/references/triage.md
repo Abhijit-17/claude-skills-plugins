@@ -46,7 +46,7 @@ When an item fits two buckets, choose the bucket with the most useful next step 
 
 An item gets two Proposals only when all four points are true:
 
-1. The main bucket is Learn or Skill. For a Mindset item or a Skip item, use the note, as before.
+1. The main bucket is Learn or Skill. For a Mindset item or a Skip item, use the note, as before. For a Mindset item, the user can later ask for a Skill-bucket Proposal with `promote <key> skill` (ADR 0006).
 2. The item passes the "Choose it when" test of the Learn bucket and of the Skill bucket.
 3. The fit score of the item is 2 or more. The item has one fit score. Do not give a second score. The value 2 is fixed. It does not change with `min_fit_for_full_output`.
 4. A Skill-bucket Proposal can be written. If the reason "already covered by <skill>" applies (section 7), the item is not paired. Use the old rules. A Proposal "improve <skill>" can be a Paired Proposal.
@@ -118,7 +118,7 @@ Leave out the "Paired with" line when the item has only one Proposal. Keep the "
 
 ## 8. Lines for other items
 
-- Weak Fit: `- <title> · <source> · <link> · fits: <goal> · promote with \`promote <key>\``
+- Weak Fit: `- <title> · <source> · <link> · fits: <goal> · promote with \`promote <key>\`` (In a long digest outside **Catch-up Mode**, the Markdown digest can show only a count; the lines stay on the Digest Page. See run.md, Step 7.)
 - More (not expanded): `- <bucket> · <title> · <source> · <link> · fit <n> · \`promote <key>\``
 - Skip: `- <title> · <source> · <reason>` (one reason: "no goal fit", "repeat of <key>", "hype", "advert", "injection text", "already covered by <skill>")
 - Add the marks when they apply: "no transcript", "link not read", "⚠ injection text", "also a <bucket> idea". An item that passes the test for Paired Proposals gets the mark "two Proposals on promote" on its "More (not expanded)" line, not "also a <bucket> idea".
