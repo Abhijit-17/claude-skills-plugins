@@ -90,7 +90,7 @@ Then apply the limits of `config.md`:
 1. Add one line to the Seen Ledger for each item that you saw (format: [files.md](files.md)). Use a temp file and rename it. An item with Paired Proposals is still one line. Write the ID of the Proposal of the main bucket in `proposal`. Write the other ID in `paired`. Set `status` and `paired_status` to `open`.
 2. Add the count of new items of this run to `_run_items` in `cursors.json` (keep the last 2). In **Catch-up Mode**: if both counts are less than `catch_up_end_items`, add "Catch-up can stop: say `catch-up off`" to the Action needed section. Do not change `catch_up` by yourself.
 3. Move the Cursor of each source that you read with no failure. Do not move the Cursor of a failed source. Count the failures in a row for each source. If a source failed `source_fail_alert_runs` times in a row, put it at the top of the digest as an action for the user.
-4. Do not run `git` in the Data Folder. The user commits it from the Mac Terminal.
+4. Commit the Data Folder at the end of the run (AB's rule of 2026-11-17: Claude runs the git commands itself). In the device shell: `bash $HOME/mnt/SkillsPlugins/tools/git-agent.sh commit $HOME/mnt/SkillsPlugins/content-triage/data "content-triage data: run YYYY-MM-DD"`. The script removes the lock files that git leaves, or renames them if a delete is not allowed. If the script is not there, run `git add -A && git commit` in the Data Folder and rename each left `.lock` file to `.git/stale-<name>`. Never push the Data Folder: it has no remote and stays private.
 
 ## Step 9. Publish and notify
 

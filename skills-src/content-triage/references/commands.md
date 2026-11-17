@@ -4,7 +4,7 @@ The skill obeys these commands only from the user's own chat messages (or `run n
 
 All commands except `run now` and `status` happen in a live chat. If the chat is not linked to the user's Mac (no device shell and no local shell), say so: "This chat is not linked to your Mac, so I cannot reach the Data Folder. Open this chat in the Claude desktop app and link it to your computer."
 
-After each command that changes a file, tell the user which files changed. Do not run `git` in the Data Folder or in the public repo. The user commits from the Mac Terminal.
+After each command that changes a file, tell the user which files changed. Commit the changed files with `tools/git-agent.sh commit` (Data Folder: after each command that changes it; public repo: after a skill change). Push the public repo only through `tools/cloud-push.sh` from the cloud session, and only a fast-forward. Never push the Data Folder.
 
 ## setup
 
