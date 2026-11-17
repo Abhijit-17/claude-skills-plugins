@@ -27,5 +27,5 @@ __pycache__/
 /prompt-audit-*/
 # Local skill build workspaces (sources, zips, check output)
 /skills-work/
-# Personal data of the content-triage skill (ADR 0004): never in this public repo
+# Personal data of the content-triage skill: moved to ~/Downloads/WORKSPACE/ContentTriage on 2026-11-17 (ADR 0009). Keep this line as a guard.
 /content-triage/data/
