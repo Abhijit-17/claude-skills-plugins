@@ -8,10 +8,11 @@ The Claude skills and tools that I use on Claude desktop, Claude cloud sessions,
 |---|---|
 | `skills/` | Skill zips. Upload in claude.ai: **Customize > Skills**. |
 | `skills/grill-with-docs.zip`, `grilling.zip`, `domain-modeling.zip`, `codebase-design.zip`, `improve-codebase-architecture.zip`, `two-axis-review.zip`, `pr.zip`, `handoff.zip` | Adapted Matt Pocock skills, build 2026-10-30.1. |
-| `skills/tdd.zip`, `diagnosing-bugs.zip`, `to-spec.zip`, `to-tickets.zip`, `implement.zip` | Adapted Matt Pocock skills (build 2026-11-13.2): test-first work, a diagnosis loop for bugs, and the flow from a discussion to a spec, to tickets, to code. The tracker is local Markdown in `.scratch/` by default. They use the 8 skills in the row above. |
+| `skills/tdd.zip`, `diagnosing-bugs.zip`, `to-spec.zip`, `to-tickets.zip`, `implement.zip` | Adapted Matt Pocock skills (build 2026-11-13.2; diagnosing-bugs 2026-11-17.1 adds a fact-and-hypothesis method): test-first work, a diagnosis loop for bugs, and the flow from a discussion to a spec, to tickets, to code. The tracker is local Markdown in `.scratch/` by default. They use the 8 skills in the row above. |
 | `skills/decompile-java-artifact.zip` | My skill: decompile a deployed Java JAR or WAR into a repo, map it, scan it for risks, explain it. |
 | `skills/reverse-engineer-anything.zip` | The REA skill (from REA 6.8.0). It needs the REA server: see [INSTALL-REA.md](INSTALL-REA.md). |
 | `skills/content-triage.zip` | My skill: watch a short list of YouTube and X sources, and sort each new item into Learn, Skill, Mindset, Jobhunt or Skip against my goals. Needs the Claude desktop app's built-in browser. |
+| `skills/verify-skill-setup.zip` | My skill: make a `verify` skill for a repo, so Claude starts the app, drives it end to end and checks the result before each commit (stop after 3 failed fix rounds; optional diff-triggered checklist). |
 | `skills-src/decompile-java-artifact/` | Source of the decompile skill. |
 | `skills-src/content-triage/`, `content-triage/` | Source of the content-triage skill, and its design glossary and ADRs. |
 | `install-rea-mac.sh` | Installs the REA server on a Mac for Claude Desktop and Claude Code. |
