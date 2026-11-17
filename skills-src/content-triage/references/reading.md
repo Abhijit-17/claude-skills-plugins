@@ -69,7 +69,7 @@ For Watch later (the YouTube **Inbox**):
 3. Read the title, the channel, the publish date, the full description, and the chapter list (if any).
 4. Get the transcript (checked 2026-11-14):
    - Do not use the direct ways. The innertube `get_transcript` call gives HTTP 400, and the `timedtext` link gives an empty body.
-   - Click "...more" (the description expander), then click "Show transcript". Use the `wait` action once.
+   - Click "...more" (the description expander). Then use the `wait` action (about 2 seconds), and click "Show transcript" in a separate step. YouTube adds the "Show transcript" button only after the description opens, so one script with both clicks fails (checked 2026-11-17 on M6mYodf0dJM). Click the button by a script; a `find` ref can be outside the view and not clickable. Then use the `wait` action once.
    - Read the elements `transcript-segment-view-model` with a short script: return the text of each segment, without the time stamps, joined with spaces. The segment text also holds the spoken time (for example "2 minutes, 5 seconds"): remove it with a pattern such as `/\b\d*\s*(seconds?|minutes?|hours?),?\s*/g`, then check that the start of the text has no such words left. Keep it in `window.__ct`. If there are no such elements, try `ytd-transcript-segment-renderer` (the older layout).
    - If there is no "Show transcript" button, or the panel stays empty: use only the title, the description and the chapters. Mark the item `no_transcript` = true. The digest shows "no transcript".
 5. Prefer the English transcript. If there is only an auto-generated transcript in another language, read it and note the language.
@@ -92,6 +92,8 @@ For Watch later (the YouTube **Inbox**):
 4. Then read the lines out of `window.__ct` in one script, before any navigation.
 
 Put several steps into one batch call. Keep the batch to 25 actions or less.
+
+**X post pages** (`/status/<id>`): wait until the page has an `article`, as for profiles (a post page can need 8 seconds or more). Find the main post by the author's handle: the `article` whose `[data-testid="User-Name"]` contains `@<handle>`. Do not take the first `/status/` link on the page: in a quote post with photos, the first links belong to the quoted post. An **X Article** (a long-form post) has no `[data-testid="tweetText"]`: read the text of the `main` element with the page-text tool (checked 2026-11-17).
 
 For each `article`: the post ID is the number in its `a[href*="/status/"]` link that has a `time` element. The handle is in the same link. The time is the `datetime` of the `time` element. The text is the `[data-testid="tweetText"]` element, cut to 150 characters for the list.
 

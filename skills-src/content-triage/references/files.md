@@ -1,7 +1,10 @@
 # File formats in the Data Folder
 
 ```
-content-triage/data/            (private; ignored by the public repo; its own local git repo)
+ContentTriage/                  (the Data Folder; private; its own local git repo, no remote; ADR 0009)
+├── CLAUDE.md                   The rules for sessions of the Content Triage project.
+├── queue.md                    Work that the user asked for: promotes, links to add, decisions to remember.
+├── tools/git-agent.sh          Commits the folder and cleans the lock files that git leaves.
 ├── GOALS.md                    AB owns it. Never change it by yourself.
 ├── sources.md                  The Source List (a Markdown table).
 ├── config.md                   The limits (key = value).
@@ -163,5 +166,6 @@ R-YYYYMMDD-N · <title> (<age> days ago). Did you try this action? Reply `kept <
 </details>
 
 ## Problems
-<one line for each failed source, missing file, or warning, with the action for the user; or "None.">
+<one line for each failed source, missing file, unread link, or warning, with the action for the user; or "None."
+Only failures and decisions for the user go here. Information (for example "Watch later: 1 new item") goes in the counts line or nowhere.>
 ```

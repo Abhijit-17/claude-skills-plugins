@@ -14,6 +14,7 @@ A **Triage Run** is often unattended (a **Scheduled Task**). Do not ask question
 
 1. Read `DATA/config.md`. Use the value after each `=`. If a value is missing, use the default in [files.md](files.md). Note if `catch_up` = `yes` (**Catch-up Mode**).
 2. Read `DATA/GOALS.md` and `DATA/sources.md`. Use only the rows with `active` = `yes`.
+   - Read `DATA/queue.md` if it exists. Do each open "Add in the next run" line with the `add` rules ([commands.md](commands.md)) in this run, and mark it done with the date. Obey its "Decisions to remember" (for example, a Problems line that the user does not want again). Do not do the "Promote" lines in a run: they are for a live chat.
 3. Read `DATA/state/seen.jsonl` (the **Seen Ledger**) and `DATA/state/cursors.json` (the **Cursors**).
 4. If `sources.md` has no active rows and both Inboxes are empty, write a short digest that says "No sources yet: add rows to sources.md". Then stop.
 5. If `GOALS.md` still has no life goals, continue. Score against the work goals only, and add one line to the Problems Section: "GOALS.md has no life goals yet".
@@ -48,12 +49,12 @@ For each item that you find:
 
 ## Step 5. Get the content of each new item
 
-**Fast Triage** (when there are more than `fast_triage_min_items` new items in this run, for example a large backlog):
+**Fast Triage** (when there are `fast_triage_min_items` or more new items in this run, for example a large backlog):
 1. Step A: give each item a first Fit Score from the list data only: the title (video) or the start of the text (post, about 150 characters).
 2. Step B: do the full read below only for the items with a first Fit Score of 2 or more. Then give the final Fit Score.
 3. The other items keep the first score. Add the flag `fast_triage`. A `promote` of such an item does the full read first. Be generous in Step A: if the title or the start is not clear, give 2, so that an important item is not lost.
 
-With `fast_triage_min_items` new items or fewer, do the full read below for each item.
+With fewer than `fast_triage_min_items` new items, do the full read below for each item. Never score an item from the list text only when Fast Triage does not apply.
 
 Follow [reading.md](reading.md): a part of the transcript of a video (start, middle, end), the full **Thread** of an X post, and one web link if the post's main content is a link. A **Pointer Post** becomes its YouTube video. Read the full transcript only in Step 7, for an item that gets a Short Read or a Proposal.
 
@@ -90,7 +91,7 @@ Then apply the limits of `config.md`:
 1. Add one line to the Seen Ledger for each item that you saw (format: [files.md](files.md)). Use a temp file and rename it. An item with Paired Proposals is still one line. Write the ID of the Proposal of the main bucket in `proposal`. Write the other ID in `paired`. Set `status` and `paired_status` to `open`.
 2. Add the count of new items of this run to `_run_items` in `cursors.json` (keep the last 2). In **Catch-up Mode**: if both counts are less than `catch_up_end_items`, add "Catch-up can stop: say `catch-up off`" to the Action needed section. Do not change `catch_up` by yourself.
 3. Move the Cursor of each source that you read with no failure. Do not move the Cursor of a failed source. Count the failures in a row for each source. If a source failed `source_fail_alert_runs` times in a row, put it at the top of the digest as an action for the user.
-4. Commit the Data Folder at the end of the run (AB's rule of 2026-11-17: Claude runs the git commands itself). In the device shell: `bash $HOME/mnt/SkillsPlugins/tools/git-agent.sh commit $HOME/mnt/SkillsPlugins/content-triage/data "content-triage data: run YYYY-MM-DD"`. The script removes the lock files that git leaves, or renames them if a delete is not allowed. If the script is not there, run `git add -A && git commit` in the Data Folder and rename each left `.lock` file to `.git/stale-<name>`. Never push the Data Folder: it has no remote and stays private.
+4. Commit the Data Folder at the end of the run (the user's rule of 2026-11-17: Claude runs the git commands itself): `bash DATA/tools/git-agent.sh commit DATA "content-triage data: run YYYY-MM-DD"`. The script removes the lock files that git leaves, or renames them if a delete is not allowed. If the script is missing, run `git add -A && git commit` in DATA and rename each left `.lock` file to `.git/stale-<name>`. Never push the Data Folder: it has no remote.
 
 ## Step 9. Publish and notify
 

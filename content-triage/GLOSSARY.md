@@ -7,7 +7,7 @@ Content Triage is a skill that watches a short list of YouTube and X sources for
 ### Folders
 
 **Data Folder**:
-The private folder `content-triage/data/`. It holds all of AB's personal data: goals, sources, config, digests, reads, and the Seen Ledger. The public repo ignores it, and it is its own local git repo.
+The private folder `~/Downloads/WORKSPACE/ContentTriage/` (until 2026-11-17: `SkillsPlugins/content-triage/data/`). It holds all of AB's personal data: goals, sources, config, digests, reads, the queue and the Seen Ledger. It is outside the public skills repo and is its own local git repo with no remote (ADR 0009). The Content Triage project in claude.ai works in it.
 _Avoid_: Workspace, state folder, private repo
 
 ### Sources
@@ -17,7 +17,7 @@ One YouTube channel or one X account that AB chose to watch. A source is on the 
 _Avoid_: Feed, subscription, follow, creator
 
 **Source List**:
-The file `content-triage/data/sources.md`. Each line is one source: name, platform, link, and an optional note on why AB follows it. Only sources on this list are watched.
+The file `ContentTriage/sources.md`. Each line is one source: name, platform, link, and an optional note on why AB follows it. Only sources on this list are watched.
 _Avoid_: Subscriptions, watchlist, following list
 
 **Inbox**:
@@ -79,7 +79,7 @@ _Avoid_: Discard, trash, ignore
 ### Scoring
 
 **Goals File**:
-The file `content-triage/data/GOALS.md`. It holds AB's work goals and life goals. AB owns it. Claude never changes it by itself.
+The file `ContentTriage/GOALS.md`. It holds AB's work goals and life goals. AB owns it. Claude never changes it by itself.
 _Avoid_: Profile, interests, preferences
 
 **Fit Score**:
@@ -95,7 +95,7 @@ The one item at the start of a digest with the highest value that day, with one 
 _Avoid_: Highlight, featured item, item of the day
 
 **Config File**:
-The file `content-triage/data/config.md`. It holds the limits for each run (for example, a maximum of 3 Short Reads). AB can change it with no rebuild.
+The file `ContentTriage/config.md`. It holds the limits for each run (for example, a maximum of 3 Short Reads). AB can change it with no rebuild.
 _Avoid_: Settings, options
 
 ### Outputs
@@ -109,7 +109,7 @@ The stable name of one Short Read: `R-YYYYMMDD-N`. AB uses it in a chat to reply
 _Avoid_: Read number
 
 **Read Library**:
-The folder `content-triage/data/reads/`. It holds one file for each Short Read, and a "Kept" list of reads whose habit AB kept.
+The folder `ContentTriage/reads/`. It holds one file for each Short Read, and a "Kept" list of reads whose habit AB kept.
 _Avoid_: Archive, notes folder, journal
 
 **Revisit**:
@@ -137,7 +137,7 @@ A Learn proposal for a topic that no course covers. On approval, teach-from-sour
 _Avoid_: New workspace, new topic
 
 **Digest**:
-The result of the triage runs of one day (one file for each day; a second run updates it): all new items, each in its bucket, with the Short Reads, the Proposals, and a closed Skip section. Its record is a Markdown file in `content-triage/data/digests/`, which is the source of truth.
+The result of the triage runs of one day (one file for each day; a second run updates it): all new items, each in its bucket, with the Short Reads, the Proposals, and a closed Skip section. Its record is a Markdown file in `ContentTriage/digests/`, which is the source of truth.
 _Avoid_: Report, newsletter, summary, feed
 
 **Digest Page**:
@@ -155,11 +155,11 @@ _Avoid_: Stage, state (alone)
 ### Memory
 
 **Seen Ledger**:
-The file `content-triage/data/state/seen.jsonl`. It has one line for each item that a run saw, keyed by platform ID (`yt:<video id>` or `x:<post id>`). It is the one record of seen items and of Proposal Status. A line holds up to two Proposal IDs.
+The file `ContentTriage/state/seen.jsonl`. It has one line for each item that a run saw, keyed by platform ID (`yt:<video id>` or `x:<post id>`). It is the one record of seen items and of Proposal Status. A line holds up to two Proposal IDs.
 _Avoid_: History, cache, database, log
 
 **Cursor**:
-The newest item that a run saw from one source. The next run reads only items that are newer. The cursors are in `content-triage/data/state/cursors.json`.
+The newest item that a run saw from one source. The next run reads only items that are newer. The cursors are in `ContentTriage/state/cursors.json`.
 _Avoid_: Bookmark, checkpoint, last-read marker
 
 **Backlog**:
@@ -167,7 +167,7 @@ Inbox items above the first-run limit of 50, and Inbox items older than 3 years.
 _Avoid_: Queue, overflow
 
 **Problems Section**:
-The short part at the end of a digest that lists each source that failed in that run, with the cause and the action for AB.
+The short part at the end of a digest that lists each failure of that run (a source, a link, a file), with the cause and the action for AB. Information that needs no action does not go here.
 _Avoid_: Errors, log, warnings
 
 **Repeat**:
@@ -187,5 +187,5 @@ A short instruction that AB gives the skill in a chat: `run now`, `add`, `approv
 _Avoid_: Action, verb, option
 
 **Scheduled Task**:
-The task on AB's account that starts a triage run at a fixed time. It needs AB's Mac, has the folders `SkillsPlugins` and `~/Downloads/LEARNING`, and only calls "run now". All logic is in the skill.
+The task on AB's account that starts a triage run at a fixed time. It needs AB's Mac, has the folders `ContentTriage` and `~/Downloads/LEARNING`, and only calls "run now". All logic is in the skill.
 _Avoid_: Cron job, trigger, routine
