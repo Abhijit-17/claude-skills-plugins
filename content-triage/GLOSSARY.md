@@ -53,7 +53,7 @@ _Avoid_: Quick scan, skim
 ### Buckets
 
 **Bucket**:
-One of four categories for an item: Learn, Skill, Mindset, or Skip. Each item has exactly one main bucket, and the Digest lists the item only there. A short note can name a second fit. One case is different. An item with a fit score of 2 or more that fits both the Skill bucket and the Learn bucket gets two Proposals (see Paired Proposal). It still has one main bucket.
+One of five categories for an item: Learn, Skill, Mindset, Jobhunt, or Skip. Each item has exactly one main bucket, and the Digest lists the item only there. A short note can name a second fit. One case is different. An item with a fit score of 2 or more that fits both the Skill bucket and the Learn bucket gets two Proposals (see Paired Proposal). It still has one main bucket.
 _Avoid_: Category, label, tag, class
 
 **Learn bucket**:
@@ -67,6 +67,10 @@ _Avoid_: Tool, automation, Skill (alone)
 **Mindset bucket**:
 The bucket for an idea that can change how AB thinks or lives. It becomes a short read.
 _Avoid_: Lifestyle, thought process, inspiration
+
+**Jobhunt bucket**:
+The bucket for items that help AB with a future job search: job search methods, interviews, resumes, pay data, companies that hire, career moves. Each item gets one line and no Short Read or Proposal, so AB can use the list later. AB can promote an item.
+_Avoid_: Career bucket, jobs list
 
 **Skip bucket**:
 The bucket for noise, repeats, hype, adverts, and items not related to AB's goals. Each Skip item has one reason.

@@ -65,12 +65,12 @@ For Watch later (the YouTube **Inbox**):
 ## YouTube: the content of one video
 
 1. Open `https://www.youtube.com/watch?v=<id>`. Pause the video if it plays.
-2. Wait until the page is loaded: the description expander (`ytd-text-inline-expander #expand`, the "...more" button) must exist. If it does not exist, use the `wait` action and check again (a maximum of 3 times).
+2. Wait until the page is loaded: the description expander (`ytd-text-inline-expander #expand`, the "...more" button) must exist. If it does not exist, take one small screenshot (scale 0.1; this makes the page render), use the `wait` action, and check again (a maximum of 3 times). With the Browser pane hidden, a video page needed 14 to 22 seconds (checked 2026-11-16).
 3. Read the title, the channel, the publish date, the full description, and the chapter list (if any).
 4. Get the transcript (checked 2026-11-14):
    - Do not use the direct ways. The innertube `get_transcript` call gives HTTP 400, and the `timedtext` link gives an empty body.
    - Click "...more" (the description expander), then click "Show transcript". Use the `wait` action once.
-   - Read the elements `transcript-segment-view-model` with a short script: return the text of each segment, without the time stamps, joined with spaces. Keep it in `window.__ct`. If there are no such elements, try `ytd-transcript-segment-renderer` (the older layout).
+   - Read the elements `transcript-segment-view-model` with a short script: return the text of each segment, without the time stamps, joined with spaces. The segment text also holds the spoken time (for example "2 minutes, 5 seconds"): remove it with a pattern such as `/\b\d*\s*(seconds?|minutes?|hours?),?\s*/g`, then check that the start of the text has no such words left. Keep it in `window.__ct`. If there are no such elements, try `ytd-transcript-segment-renderer` (the older layout).
    - If there is no "Show transcript" button, or the panel stays empty: use only the title, the description and the chapters. Mark the item `no_transcript` = true. The digest shows "no transcript".
 5. Prefer the English transcript. If there is only an auto-generated transcript in another language, read it and note the language.
 6. **How much to read.** A full transcript has 3,000 to 8,000 words or more. Do not put the full text into the model for each video:
@@ -84,7 +84,7 @@ For Watch later (the YouTube **Inbox**):
 
 `window.scrollBy` and `scrollIntoView` alone do not load enough new posts when the Browser pane is hidden. Use this method:
 
-1. Open the page. Take one screenshot (this makes the page render).
+1. Open the page. Wait until the page has at least one `article`: check with a short script, and use the `wait` action between checks (4 seconds, a maximum of 3 times). If there is still no `article`, open the page again once and wait 8 seconds. (One profile needed 8 seconds on 2026-11-16.) Then take one small screenshot (scale 0.1; this makes the page render).
 2. Repeat these two steps:
    1. Scroll with the mouse wheel: the `scroll` action of the `computer` tool, down, over the post list.
    2. Run a short script. It collects each `article` on the page into `window.__ct` (a map from the post ID to the line `id|handle|time|text`), then calls `window.scrollBy(0, 2600)`, and returns two numbers only: the count of new posts in this step, and the total count.
@@ -99,7 +99,7 @@ For each `article`: the post ID is the number in its `a[href*="/status/"]` link 
 
 1. Open the profile link (`https://x.com/<handle>`). Use the scroll method.
 2. Skip the pinned post, unless it is new. Skip pure reposts of other accounts (the author did not write them). Keep quote posts: the quoted post is context only.
-3. Stop at the Cursor (the newest post ID that the last run saw), or after `max_posts_per_x_profile` posts. Post IDs grow with time, so a bigger ID is newer.
+3. Stop at the Cursor (the newest post ID that the last run saw), or after `max_posts_per_x_profile` posts. Post IDs grow with time, so a bigger ID is newer. The Cursor is reached only when you collect a post of the profile's own handle, not pinned and not a repost, with an ID equal to or smaller than the Cursor. An old pinned post or an old repost does not count.
 4. The new Cursor is the biggest post ID that you read.
 5. **Find the Threads in the list.** A **Thread** shows on the profile as separate posts of the same author. A post is a Thread candidate if:
    - it has a "Show this thread" link, or
@@ -109,13 +109,13 @@ For each `article`: the post ID is the number in its `a[href*="/status/"]` link 
 ### X: Bookmarks (Inbox)
 
 1. Open `https://x.com/i/bookmarks`. The page redirects to `https://x.com/i/history`, with the tabs "Bookmarks" and "Likes". Check that the "Bookmarks" tab is selected. If not, click it. Never read the "Likes" tab.
-2. Use the scroll method. Read the bookmarked posts, newest first, until you find a post ID that is already in the Seen Ledger, or until the first-run limit. Each new post is an item with `from` = `inbox`.
+2. Use the scroll method. The Bookmarks list keeps only the visible posts on the page: a post that scrolls away is removed. So, for Bookmarks, the collect script keeps the full text of each post (up to 1,000 characters) and its links in `window.__ct` during the scroll. Do not scroll back to read a post later. Read the bookmarked posts, newest first, until you find a post ID that is already in the Seen Ledger, or until the first-run limit. Each new post is an item with `from` = `inbox`.
 3. Do not remove a bookmark.
 
 ## X: the content of one post
 
 1. **Thread.** If the author replied to their own post in a chain, open the post (`https://x.com/<handle>/status/<id>`). Read the first post and all of the author's own replies in that chain. Together they are one item. The key is the ID of the first post. Do not read the replies of other people.
 2. **Pointer Post.** If the main content of the post is a YouTube link, the item is the video: use the key `yt:<video id>` and read it as above. If the video is already in the Seen Ledger, the post is a **Repeat** (Skip, reason "repeat of yt:<id>"). Record the post key too, so it is not read again.
-3. **One web link.** If the main content is a link to an article, a blog post or a GitHub repo: open that one link in the browser (read-only). Read a maximum of `max_link_words` words. Do not sign in, download files, fill in forms, or follow more links. For a GitHub repo, read the README.
+3. **One web link.** If the main content is a link to an article, a blog post or a GitHub repo: open that one link in the browser (read-only). Read a maximum of `max_link_words` words. Read the main text first (the `article` or `main` element). Stop at long lists that are not content, for example names, signatures, comments or related links. Give the page-text tool a character limit (about 8,000 characters is enough for most articles). Do not sign in, download files, fill in forms, or follow more links. For a GitHub repo, read the README.
 4. **A paywall or a sign-in wall** on the link: triage the post text only. Mark the item `link_not_read` = true.
 5. **Images and videos in a post:** use the text and the alt text only. Do not download media.

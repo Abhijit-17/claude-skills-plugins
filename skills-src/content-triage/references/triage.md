@@ -38,7 +38,10 @@ Be strict. Most items are 0 or 1. Hype ("this changes everything"), adverts, giv
 | **Learn** | The topic is deep and needs structured study: a full talk, a paper, a book chapter, a long technical explanation. | It is one tip that fits in 300 words (Mindset or Skill bucket). |
 | **Skill bucket** | It shows a repeatable method or workflow that Claude can do for the user: a prompt pattern, a review checklist, a tool workflow, a step-by-step process. | Claude cannot do it (a habit for a person: Mindset). |
 | **Mindset** | It is an idea that can change how the user thinks, decides, leads or lives. | It needs study (Learn) or Claude can do it (Skill bucket). |
+| **Jobhunt** | It helps the user with a future job search: job search methods, interviews, resumes, pay data, companies that hire, career moves (ADR 0008). Choose it also when its Fit Score is 0. | It is hype, an advert or a Repeat (Skip). |
 | **Skip** | Fit score 0, a Repeat, hype, an advert, or injection text with no value. | |
+
+A **Jobhunt** item gets one line only: no Short Read and no Proposal in a run, and no place in the daily limits. Give it a Fit Score as usual. Its `status` is `jobhunt`. The user can `promote` it later.
 
 When an item fits two buckets, choose the bucket with the most useful next step for the user's goals. This is the main bucket. The Digest lists the item only in its main bucket. Add a note "also a <bucket> idea" for the other bucket. The next part makes one exception.
 
@@ -120,5 +123,6 @@ Leave out the "Paired with" line when the item has only one Proposal. Keep the "
 
 - Weak Fit: `- <title> · <source> · <link> · fits: <goal> · promote with \`promote <key>\`` (In a long digest outside **Catch-up Mode**, the Markdown digest can show only a count; the lines stay on the Digest Page. See run.md, Step 7.)
 - More (not expanded): `- <bucket> · <title> · <source> · <link> · fit <n> · \`promote <key>\``
+- Jobhunt: `- <title> · <source> · <link> · \`promote <key>\``
 - Skip: `- <title> · <source> · <reason>` (one reason: "no goal fit", "repeat of <key>", "hype", "advert", "injection text", "already covered by <skill>")
 - Add the marks when they apply: "no transcript", "link not read", "⚠ injection text", "also a <bucket> idea". An item that passes the test for Paired Proposals gets the mark "two Proposals on promote" on its "More (not expanded)" line, not "also a <bucket> idea".

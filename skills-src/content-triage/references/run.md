@@ -27,6 +27,7 @@ For each line in the Seen Ledger with `status` = `open` and a `proposal`: if the
 ## Step 3. Check the browser
 
 1. Load the `built-in-browser` skill. Open a new tab.
+   - Call `tabs_context`. If it says that the Browser pane is hidden, continue, but add one line to the Problems Section: "The Browser pane was hidden, so pages loaded slowly. Keep the Browser pane open in the Claude desktop app during a run." The user decided on 2026-11-16 to keep the built-in browser and to keep its pane visible (ADR 0001).
 2. If the browser is not reachable (no tools, or the calls fail): write the digest with only a Problems Section ("The built-in browser was not reachable. Is the Mac awake, online, and is the Claude desktop app open?"). Do not move any Cursor. Send the notification (Step 9) and stop. The next run catches up.
 
 ## Step 4. Collect new items

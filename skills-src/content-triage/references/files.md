@@ -59,13 +59,13 @@ An item with Paired Proposals is still one line. It has two more fields:
 |---|---|
 | `id` | `yt:<video id>` or `x:<post id>` (for a Thread: the first post) |
 | `from` | `source`, `inbox`, or `chat` (a link that the user gave with `add`) |
-| `bucket` | `Learn`, `Skill`, `Mindset`, `Skip`, or null (backlog) |
+| `bucket` | `Learn`, `Skill`, `Mindset`, `Jobhunt`, `Skip`, or null (backlog) |
 | `fit` | 0 to 3, or null (backlog) |
 | `proposal` | `L-...` or `S-...`, or null. For an item with Paired Proposals: the Proposal of the main bucket. For a Mindset item after `promote <key> skill`: the `S-...` Proposal (ADR 0006) |
 | `paired` | Optional. The ID of the other Paired Proposal: `S-...` if the main bucket is Learn, `L-...` if it is Skill. A missing field is null: no Paired Proposal |
 | `paired_status` | Optional. `open`, `approved`, `rejected`, or `expired`: the status of the Proposal in `paired`. A missing field is null |
 | `read` | `R-...`, or null |
-| `status` | `done` (no further action), `open` (proposal waits), `approved`, `rejected`, `expired`, `backlog`, `weak` (Weak Fit, promotable), `more` (not expanded, promotable) |
+| `status` | `done` (no further action), `open` (proposal waits), `approved`, `rejected`, `expired`, `backlog`, `jobhunt` (Jobhunt line, promotable), `weak` (Weak Fit, promotable), `more` (not expanded, promotable) |
 | `flags` | any of `no_transcript`, `link_not_read`, `injection`, `repeat`, `part_read` (only parts of a long transcript were read; see reading.md), `fast_triage` (scored from the title and the start of the text only; see run.md Step 6) |
 | `note` | free text, for example the reject reason, "repeat of yt:...", "also a Mindset idea" |
 
@@ -116,7 +116,7 @@ One file for each day. A second run on the same day (or an `add` command) update
 ```md
 # Digest YYYY-MM-DD
 
-<N> new items · Learn <n> · Skill <n> · Mindset <n> · Skip <n> · from <sources read>/<sources active> sources · <r> runs today<; Catch-up Mode, if on>
+<N> new items · Learn <n> · Skill <n> · Mindset <n> · Jobhunt <n> · Skip <n> · from <sources read>/<sources active> sources · <r> runs today<; Catch-up Mode, if on>
 
 ## Action needed
 <only if a source failed source_fail_alert_runs times in a row, a setup problem, or "Catch-up can stop: say `catch-up off`">
@@ -143,6 +143,9 @@ Reply in a chat: `approve <ID>`, `reject <ID> [reason]`.
 ## Mindset
 <Short Reads>
 <Weak Fit lines>
+
+## Jobhunt
+<one line for each Jobhunt item (template in triage.md, section 8); never shortened to a count>
 
 ## Revisit
 <only in the first run on or after a Monday>

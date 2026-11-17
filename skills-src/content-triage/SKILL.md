@@ -1,8 +1,8 @@
 ---
 name: content-triage
-description: Watches the user's short list of YouTube channels and X accounts, plus the X Bookmarks and YouTube Watch later inboxes, and sorts each new item into one main bucket (Learn, Skill, Mindset, Skip) against the user's goals file. An item that fits both Learn and Skill well gets two proposals. Writes a digest with short reads and proposals that wait for approval. Use when the user says "content-triage" or "triage", asks to run the triage now, gives a triage command (setup, run now, add, approve, reject, promote, catch-up, kept, drop, status) with an ID such as L-20261104-1, S-20261104-2 or R-20261104-1, or when a scheduled task calls this skill.
+description: Watches the user's short list of YouTube channels and X accounts, plus the X Bookmarks and YouTube Watch later inboxes, and sorts each new item into one main bucket (Learn, Skill, Mindset, Jobhunt, Skip) against the user's goals file. An item that fits both Learn and Skill well gets two proposals. Writes a digest with short reads and proposals that wait for approval. Use when the user says "content-triage" or "triage", asks to run the triage now, gives a triage command (setup, run now, add, approve, reject, promote, catch-up, kept, drop, status) with an ID such as L-20261104-1, S-20261104-2 or R-20261104-1, or when a scheduled task calls this skill.
 metadata:
-  build: "2026-11-15.1"
+  build: "2026-11-16.1"
 ---
 
 # Content triage

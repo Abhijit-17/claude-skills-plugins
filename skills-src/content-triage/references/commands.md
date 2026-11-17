@@ -51,7 +51,7 @@ The user can give one ID, several IDs, or a group ("all Learn from this week"). 
 
 ## promote <key>
 
-1. The key is `yt:...` or `x:...` from a Weak Fit or "More" line. Its `status` must be `weak` or `more`.
+1. The key is `yt:...` or `x:...` from a Weak Fit, "More" or Jobhunt line. Its `status` must be `weak`, `more` or `jobhunt`. For a Jobhunt item, write a Short Read or a Skill-bucket Proposal, whichever fits; keep `bucket` = `Jobhunt`.
 2. Read the item again, if needed. Write the full output for its bucket now: a Short Read (with a new `R-` ID of today) or a Proposal (with a new `L-` or `S-` ID of today). Test the item for Paired Proposals ([triage.md](triage.md), section 4). If it passes, write both Paired Proposals, each with the "Paired with" line. A Weak Fit item (fit score 1) never passes this test. It gets one output, as before. `promote` does not change the fit score.
 3. Update the ledger line (`status`, `read` or `proposal`; for Paired Proposals also `paired` and `paired_status`).
 4. Show the new output in the chat. It also goes into the next digest under "Open proposals" (for a Proposal).
